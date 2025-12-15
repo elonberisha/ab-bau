@@ -14,6 +14,11 @@ function requireLogin() {
     }
 }
 
+// Get current logged-in user info
+function getCurrentUser() {
+    return $_SESSION['current_user'] ?? null;
+}
+
 // Get data directory path
 function getDataPath($file) {
     return dirname(__DIR__) . '/data/' . $file;
@@ -48,21 +53,60 @@ function writeJson($file, $data) {
     return file_put_contents($path, $json, LOCK_EX);
 }
 
-// Verify password
-function verifyPassword($password) {
+// NEW: Verify user credentials
+function verifyUserCredentials($username, $password) {
     $config = readJson('config.json');
-    if (isset($config['password_hash']) && !empty($config['password_hash'])) {
-        $verified = password_verify($password, $config['password_hash']);
-        if ($verified) {
-            return true;
+    $users = $config['users'] ?? [];
+    
+    foreach ($users as $user) {
+        if ($user['username'] === $username) {
+            if (password_verify($password, $user['password_hash'])) {
+                return $user; // Return user array on success
+            }
         }
     }
-    // Fallback for default password (if hash verification fails or no hash exists)
-    if (isset($config['default_password'])) {
-        return $password === $config['default_password'];
+    return false;
+}
+
+// NEW: Update user password
+function updateUserPassword($username, $newPassword) {
+    $config = readJson('config.json');
+    $users = $config['users'] ?? [];
+    $updated = false;
+    
+    foreach ($users as &$user) {
+        if ($user['username'] === $username) {
+            $user['password_hash'] = hashPassword($newPassword);
+            $updated = true;
+            break;
+        }
     }
-    // Final fallback
-    return $password === 'admin123';
+    
+    if ($updated) {
+        return writeJson('config.json', $config);
+    }
+    return false;
+}
+
+// NEW: Get user by email (for forgot password)
+function getUserByEmail($email) {
+    $config = readJson('config.json');
+    $users = $config['users'] ?? [];
+    
+    foreach ($users as $user) {
+        if (strtolower($user['email']) === strtolower($email)) {
+            return $user;
+        }
+    }
+    return null;
+}
+
+// Verify password (LEGACY - keeping for backward compatibility if needed, but updated)
+function verifyPassword($password) {
+    // This function is deprecated in favor of verifyUserCredentials
+    // But we'll make it work for 'admin' user by default just in case
+    $user = verifyUserCredentials('admin', $password);
+    return $user !== false;
 }
 
 // Hash password
@@ -70,11 +114,9 @@ function hashPassword($password) {
     return password_hash($password, PASSWORD_DEFAULT);
 }
 
-// Update password
+// Update password (LEGACY - updates 'admin' password)
 function updatePassword($newPassword) {
-    $config = readJson('config.json');
-    $config['password_hash'] = hashPassword($newPassword);
-    return writeJson('config.json', $config);
+    return updateUserPassword('admin', $newPassword);
 }
 
 // Sanitize input - preserve text structure but clean it
@@ -339,4 +381,3 @@ function getStats() {
         'approved_reviews' => count($reviews['approved'] ?? [])
     ];
 }
-
