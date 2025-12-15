@@ -1,4 +1,5 @@
 {
     "password_hash": "$2y$10$nopCpzmCBRWrC.PsntE15uOd6ynChLjunSjVTrlT8qMHlkblX7eza",
-    "default_password": "admin123"
+    "default_password": "admin123",
+    "admin_email": "info@devycore.com"
 }
