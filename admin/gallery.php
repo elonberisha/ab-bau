@@ -32,6 +32,26 @@ if (isset($_GET['use_image'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     
+    // Handle settings update
+    if ($action === 'update_settings') {
+        $customization['gallery']['hero_image'] = sanitize($_POST['gallery_hero_image'] ?? '');
+        $customization['gallery']['show_in_index'] = isset($_POST['gallery_show_in_index']);
+        $customization['gallery']['max_images_index'] = intval($_POST['gallery_max_images_index'] ?? 6);
+        $customization['gallery']['index_title'] = sanitize($_POST['gallery_index_title'] ?? '');
+        $customization['gallery']['index_description'] = sanitize($_POST['gallery_index_description'] ?? '');
+        $customization['gallery']['full_title'] = sanitize($_POST['gallery_full_title'] ?? '');
+        $customization['gallery']['full_description'] = sanitize($_POST['gallery_full_description'] ?? '');
+        
+        if (writeJson('customization.json', $customization)) {
+            $message = 'Settings u ruajtën me sukses! Ndryshimet reflektohen në index.html';
+            $messageType = 'success';
+        } else {
+            $message = 'Gabim në ruajtje!';
+            $messageType = 'error';
+        }
+        $customization = readJson('customization.json');
+    }
+    
     if ($action === 'add') {
         // Only use path from media library
         if (isset($_POST['image_path']) && !empty($_POST['image_path'])) {
@@ -94,13 +114,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 <!DOCTYPE html>
-<html lang="sq">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $pageTitle; ?> - Admin Panel</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../dist/css/output.css">
+    <link rel="stylesheet" href="../assets/fontawesome/all.min.css">
+    <script src="js/media-picker.js"></script>
 </head>
 <body class="bg-gray-100">
     <?php include 'includes/sidebar.php'; ?>
@@ -118,6 +139,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </a>
             </div>
         <?php endif; ?>
+
+        <!-- Gallery Settings -->
+        <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <h2 class="text-xl font-bold mb-4 flex items-center">
+                <i class="fas fa-cog text-primary mr-2"></i>
+                Gallery Settings
+            </h2>
+            <form method="POST" class="space-y-4">
+                <input type="hidden" name="action" value="update_settings">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <span class="text-primary font-bold mr-1">*</span>Hero Image URL
+                    </label>
+                    <input type="text" name="gallery_hero_image" data-media-picker="image"
+                           value="<?php echo htmlspecialchars($customization['gallery']['hero_image'] ?? ''); ?>" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                    <p class="text-xs text-gray-500 mt-1">URL e fotos së hero në faqen Gallery / Projekte</p>
+                </div>
+                
+                <div>
+                    <label class="flex items-center">
+                        <input type="checkbox" name="gallery_show_in_index" <?php echo ($customization['gallery']['show_in_index'] ?? false) ? 'checked' : ''; ?> class="mr-2">
+                        <span>Shfaq Gallery në Index</span>
+                    </label>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Max Images në Index</label>
+                    <input type="number" name="gallery_max_images_index" value="<?php echo $customization['gallery']['max_images_index'] ?? 6; ?>" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Titulli në Index</label>
+                    <input type="text" name="gallery_index_title" value="<?php echo htmlspecialchars($customization['gallery']['index_title'] ?? ''); ?>" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Përshkrimi në Index</label>
+                    <textarea name="gallery_index_description" rows="2" 
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg"><?php echo htmlspecialchars($customization['gallery']['index_description'] ?? ''); ?></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Titulli në Faqen e Plotë</label>
+                    <input type="text" name="gallery_full_title" value="<?php echo htmlspecialchars($customization['gallery']['full_title'] ?? ''); ?>" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Përshkrimi në Faqen e Plotë</label>
+                    <textarea name="gallery_full_description" rows="2" 
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg"><?php echo htmlspecialchars($customization['gallery']['full_description'] ?? ''); ?></textarea>
+                </div>
+                
+                <button type="submit" class="bg-gray-800 text-white px-6 py-3 rounded-lg hover:bg-gray-900 font-semibold text-lg shadow-lg hover:shadow-xl transition-all">
+                    <i class="fas fa-save mr-2"></i>Ruaj Settings
+                </button>
+            </form>
+        </div>
 
         <!-- Add New Image Form -->
         <div class="bg-white rounded-lg shadow p-6 mb-8">
@@ -155,7 +232,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </select>
                 </div>
                 <div class="flex items-end">
-                    <button type="submit" class="w-full bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-dark font-semibold text-lg shadow-lg hover:shadow-xl transition-all">
+                    <button type="submit" class="w-full bg-gray-800 text-white px-6 py-3 rounded-lg hover:bg-gray-900 font-semibold text-lg shadow-lg hover:shadow-xl transition-all">
                         <i class="fas fa-save mr-2"></i>Ruaj Foto
                     </button>
                 </div>

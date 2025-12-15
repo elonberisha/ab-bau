@@ -382,17 +382,38 @@ if (reviewForm) {
         submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Wird gesendet...';
         submitButton.disabled = true;
         
-        // Simulate form submission
-        setTimeout(() => {
-            console.log('Review submitted:', reviewData);
-            
-            // Show success message
-            if (reviewSuccess) {
-                reviewSuccess.classList.remove('hidden');
+        // Submit review to API
+        const formData = new FormData();
+        formData.append('name', reviewData.name);
+        formData.append('message', reviewData.message);
+        formData.append('rating', reviewData.rating);
+        
+        fetch('api/submit-review.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                console.log('Review submitted:', reviewData);
+                
+                // Show success message
+                if (reviewSuccess) {
+                    reviewSuccess.classList.remove('hidden');
+                }
+                reviewForm.reset();
+                selectedRating = 0;
+                updateStarDisplay();
+                
+                // Reload reviews to show the new one (if approved)
+                if (typeof loadReviews === 'function') {
+                    setTimeout(() => {
+                        loadReviews();
+                    }, 1000);
+                }
+            } else {
+                alert('Fehler beim Senden der Bewertung. Bitte versuchen Sie es erneut.');
             }
-            reviewForm.reset();
-            selectedRating = 0;
-            updateStarDisplay();
             
             // Reset button
             submitButton.innerHTML = originalText;
@@ -404,7 +425,13 @@ if (reviewForm) {
                     reviewSuccess.classList.add('hidden');
                 }, 5000);
             }
-        }, 1500);
+        })
+        .catch(error => {
+            console.error('Error submitting review:', error);
+            alert('Fehler beim Senden der Bewertung. Bitte versuchen Sie es erneut.');
+            submitButton.innerHTML = originalText;
+            submitButton.disabled = false;
+        });
     });
 }
 
@@ -541,6 +568,56 @@ if ('IntersectionObserver' in window) {
     document.querySelectorAll('img[data-src]').forEach(img => {
         imageObserver.observe(img);
     });
+}
+
+// Cookie Banner
+function initCookieBanner() {
+    // Check if user has already accepted cookies
+    const cookieConsent = localStorage.getItem('cookieConsent');
+    
+    if (!cookieConsent) {
+        // Create cookie banner
+        const cookieBanner = document.createElement('div');
+        cookieBanner.id = 'cookieBanner';
+        cookieBanner.className = 'fixed bottom-0 left-0 right-0 bg-gray-900 text-white p-4 sm:p-6 z-50 shadow-2xl border-t border-gray-800';
+        cookieBanner.innerHTML = `
+            <div class="container mx-auto max-w-7xl">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div class="flex-1">
+                        <h3 class="text-lg font-bold mb-2">Cookies & Datenschutz</h3>
+                        <p class="text-sm text-gray-300">
+                            Diese Website verwendet keine Cookies, die personenbezogene Daten sammeln. Wir respektieren Ihre Privatsphäre und verwenden keine Tracking-Technologien. 
+                            <a href="datenschutz.html" class="text-primary hover:underline">Mehr erfahren</a>
+                        </p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button id="acceptCookies" class="bg-primary hover:bg-primary-dark text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                            Verstanden
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(cookieBanner);
+        
+        // Add event listener to accept button
+        document.getElementById('acceptCookies').addEventListener('click', () => {
+            localStorage.setItem('cookieConsent', 'accepted');
+            cookieBanner.style.transform = 'translateY(100%)';
+            cookieBanner.style.transition = 'transform 0.3s ease-out';
+            setTimeout(() => {
+                cookieBanner.remove();
+            }, 300);
+        });
+    }
+}
+
+// Initialize cookie banner when DOM is loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCookieBanner);
+} else {
+    initCookieBanner();
 }
 
 console.log('%cAB Bau - Bau und Fliesen UG', 'color: #0066cc; font-size: 20px; font-weight: bold;');

@@ -419,8 +419,8 @@ body {
     width: 100%;
 }
 
-/* Responsive images */
-img {
+/* Responsive images - Only apply if no Tailwind height/width classes */
+img:not([class*="h-"]):not([class*="w-"]) {
     max-width: 100%;
     height: auto;
     display: block;
@@ -448,8 +448,8 @@ img {
     backdrop-filter: blur(12px);
 }
 
-/* Smooth Transitions */
-* {
+/* Smooth Transitions - Only apply to elements without Tailwind classes */
+*:not([class*="transition"]):not([class*="duration"]):not([class*="ease"]) {
     transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 150ms;
@@ -461,8 +461,8 @@ img {
     outline-offset: 2px;
 }
 
-/* Image Optimization */
-img {
+/* Image Optimization - Only apply if no Tailwind height/width classes */
+img:not([class*="h-"]):not([class*="w-"]) {
     max-width: 100%;
     height: auto;
 }

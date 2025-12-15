@@ -7,39 +7,20 @@
     <title>Leistungen - AB Bau | Keramik, Marmor & Granit</title>
     
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="dist/css/output.css">
     
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
-    <!-- AOS Animation Library -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Font Awesome (Local) -->
+    <link rel="stylesheet" href="assets/fontawesome/all.min.css">
+
+    <!-- Google Fonts (Local) -->
+    <link rel="stylesheet" href="assets/css/google-fonts.css">
+
+    <!-- AOS Animation Library (Local) -->
+    <link href="assets/css/aos.css" rel="stylesheet">
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/styles.css">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#0066cc',
-                        'primary-dark': '#004499',
-                        'primary-light': '#3399ff',
-                        accent: '#ffd700',
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'Poppins', 'sans-serif'],
-                    },
-                }
-            }
-        }
-    </script>
 </head>
 <body class="font-sans antialiased">
     
@@ -63,16 +44,13 @@
                         Leistungen
                     </a></li>
                     <li><a href="portfolio.html" class="nav-link px-4 py-2 text-gray-800 hover:text-primary font-medium text-sm xl:text-base transition-all duration-300 rounded-lg hover:bg-gray-50">
-                        Portfolio
+                        Projekte
                     </a></li>
                     <li><a href="catalogs.html" class="nav-link px-4 py-2 text-gray-800 hover:text-primary font-medium text-sm xl:text-base transition-all duration-300 rounded-lg hover:bg-gray-50">
                         Kataloge
                     </a></li>
                     <li><a href="contact.html" class="nav-link px-4 py-2 text-gray-800 hover:text-primary font-medium text-sm xl:text-base transition-all duration-300 rounded-lg hover:bg-gray-50">
                         Kontakt
-                    </a></li>
-                    <li class="ml-4"><a href="contact.html" class="bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-3 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 font-semibold text-sm xl:text-base">
-                        Termin vereinbaren
                     </a></li>
                 </ul>
                 
@@ -101,7 +79,7 @@
     <!-- Page Header -->
     <section class="relative pt-32 sm:pt-36 lg:pt-40 pb-16 sm:pb-20 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
         <div class="absolute inset-0">
-            <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=1920&h=600&fit=crop" 
+            <img id="services-hero-bg" src="" 
                  alt="Services Background" 
                  loading="eager"
                  class="w-full h-full object-cover opacity-30">
@@ -109,8 +87,8 @@
         </div>
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
             <div class="text-center text-white" data-aos="fade-up">
-                <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6">Unsere Leistungen</h1>
-                <p class="text-xl sm:text-2xl text-white/90 max-w-3xl mx-auto">Premium Materialien, Professionelle Verlegung</p>
+                <h1 id="services-hero-title" class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6"></h1>
+                <p id="services-hero-subtitle" class="text-xl sm:text-2xl text-white/90 max-w-3xl mx-auto"></p>
             </div>
         </div>
     </section>
@@ -118,194 +96,37 @@
     <!-- Services Content -->
     <section class="py-20 sm:py-24 lg:py-32 bg-gradient-to-b from-white via-gray-50 to-white">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-            <div class="text-center mb-16 lg:mb-20" data-aos="fade-up">
-                <div class="inline-block mb-4">
-                    <span class="text-primary font-semibold text-sm uppercase tracking-wider">Unsere Expertise</span>
-                </div>
-                <h2 class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-gray-900 mb-6 leading-tight">
-                    Premium Materialien,<br class="hidden sm:block"/>
-                    <span class="bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">Professionelle Verlegung</span>
-                </h2>
-                <p class="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                    Wir spezialisieren uns auf die Verlegung und Bearbeitung von hochwertigen Natursteinen und Keramik
-                </p>
-            </div>
-            
-            <div class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                <!-- Service Card 1 - Keramik -->
-                <div class="group bg-white p-8 lg:p-10 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-primary/20 relative overflow-hidden" data-aos="fade-up" data-aos-delay="100">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
-                    <div class="relative z-10">
-                        <div class="flex justify-center mb-6">
-                            <div class="w-full max-w-48 sm:max-w-56 lg:max-w-64 bg-gray-50 p-2.5 sm:p-3 rounded-xl">
-                                <div class="w-full h-28 sm:h-32 lg:h-36 rounded-lg overflow-hidden group-hover:scale-105 transition-transform duration-500">
-                                    <img src="kiramika.png" 
-                                         alt="Keramik Fliesen" 
-                                         loading="lazy"
-                                         class="w-full h-full object-contain">
-                                </div>
-                            </div>
-                        </div>
-                        <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-4 text-center">Keramik</h3>
-                        <p class="text-gray-600 leading-relaxed mb-6 text-center">
-                            Professionelle Verlegung von Keramikfliesen für Bäder, Küchen, Wohnräume und Außenbereiche.
-                        </p>
-                        <ul class="space-y-3 mb-6">
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-primary mt-1 mr-3 flex-shrink-0"></i>
-                                <span class="text-gray-700">Badezimmer und Küchenfliesen</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-primary mt-1 mr-3 flex-shrink-0"></i>
-                                <span class="text-gray-700">Terrasse und Außenbereich</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-primary mt-1 mr-3 flex-shrink-0"></i>
-                                <span class="text-gray-700">Fugenarbeiten und Oberflächenschutz</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-primary mt-1 mr-3 flex-shrink-0"></i>
-                                <span class="text-gray-700">Wand- und Bodenfliesen</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-primary mt-1 mr-3 flex-shrink-0"></i>
-                                <span class="text-gray-700">Beratung bei Materialauswahl</span>
-                            </li>
-                        </ul>
-                        <a href="contact.html" class="block w-full text-center bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300">
-                            Angebot anfordern
-                        </a>
-                    </div>
-                </div>
-                
-                <!-- Service Card 2 - Marmor -->
-                <div class="group bg-white p-8 lg:p-10 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-primary/20 relative overflow-hidden" data-aos="fade-up" data-aos-delay="200">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
-                    <div class="relative z-10">
-                        <div class="flex justify-center mb-6">
-                            <div class="w-full max-w-48 sm:max-w-56 lg:max-w-64 bg-gray-50 p-2.5 sm:p-3 rounded-xl">
-                                <div class="w-full h-28 sm:h-32 lg:h-36 rounded-lg overflow-hidden group-hover:scale-105 transition-transform duration-500">
-                                    <img src="mermeri.png" 
-                                         alt="Marmor" 
-                                         loading="lazy"
-                                         class="w-full h-full object-contain">
-                                </div>
-                            </div>
-                        </div>
-                        <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-4 text-center">Marmor</h3>
-                        <p class="text-gray-600 leading-relaxed mb-6 text-center">
-                            Verlegung und Bearbeitung von Marmor für Böden, Wände, Treppen und Arbeitsplatten.
-                        </p>
-                        <ul class="space-y-3 mb-6">
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-primary mt-1 mr-3 flex-shrink-0"></i>
-                                <span class="text-gray-700">Marmorböden und -wände</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-primary mt-1 mr-3 flex-shrink-0"></i>
-                                <span class="text-gray-700">Marmorarbeitsplatten für Küchen</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-primary mt-1 mr-3 flex-shrink-0"></i>
-                                <span class="text-gray-700">Polieren und Pflege von Marmor</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-primary mt-1 mr-3 flex-shrink-0"></i>
-                                <span class="text-gray-700">Marmortreppen und -verkleidungen</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-primary mt-1 mr-3 flex-shrink-0"></i>
-                                <span class="text-gray-700">Individuelle Marmorlösungen</span>
-                            </li>
-                        </ul>
-                        <a href="contact.html" class="block w-full text-center bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300">
-                            Angebot anfordern
-                        </a>
-                    </div>
-                </div>
-                
-                <!-- Service Card 3 - Granit -->
-                <div class="group bg-white p-8 lg:p-10 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-primary/20 relative overflow-hidden" data-aos="fade-up" data-aos-delay="300">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
-                    <div class="relative z-10">
-                        <div class="flex justify-center mb-6">
-                            <div class="w-full max-w-48 sm:max-w-56 lg:max-w-64 bg-gray-50 p-2.5 sm:p-3 rounded-xl">
-                                <div class="w-full h-28 sm:h-32 lg:h-36 rounded-lg overflow-hidden group-hover:scale-105 transition-transform duration-500">
-                                    <img src="graniti.png" 
-                                         alt="Granit" 
-                                         loading="lazy"
-                                         class="w-full h-full object-contain">
-                                </div>
-                            </div>
-                        </div>
-                        <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-4 text-center">Granit</h3>
-                        <p class="text-gray-600 leading-relaxed mb-6 text-center">
-                            Professionelle Verlegung von Granit für Innen- und Außenbereiche. Robust, langlebig und elegant.
-                        </p>
-                        <ul class="space-y-3 mb-6">
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-primary mt-1 mr-3 flex-shrink-0"></i>
-                                <span class="text-gray-700">Granitböden und -treppen</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-primary mt-1 mr-3 flex-shrink-0"></i>
-                                <span class="text-gray-700">Granitarbeitsplatten</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-primary mt-1 mr-3 flex-shrink-0"></i>
-                                <span class="text-gray-700">Granitfassaden und Außenanlagen</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-primary mt-1 mr-3 flex-shrink-0"></i>
-                                <span class="text-gray-700">Granitverkleidungen</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-primary mt-1 mr-3 flex-shrink-0"></i>
-                                <span class="text-gray-700">Wartung und Reparatur</span>
-                            </li>
-                        </ul>
-                        <a href="contact.html" class="block w-full text-center bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300">
-                            Angebot anfordern
-                        </a>
-                    </div>
-                </div>
+            <div id="services-page-list" class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                <!-- Services will be loaded dynamically -->
             </div>
 
             <!-- Additional Services -->
-            <div class="mt-20">
-                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-12 text-center">Zusätzliche Leistungen</h2>
-                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100" data-aos="fade-up" data-aos-delay="100">
-                        <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                            <i class="fas fa-tools text-primary text-xl"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Reparaturen</h3>
-                        <p class="text-gray-600 text-sm">Schnelle und professionelle Reparatur von beschädigten Fliesen und Natursteinen</p>
-                    </div>
-                    
-                    <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100" data-aos="fade-up" data-aos-delay="200">
-                        <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                            <i class="fas fa-spray-can text-primary text-xl"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Imprägnierung</h3>
-                        <p class="text-gray-600 text-sm">Professionelle Imprägnierung zum Schutz Ihrer Natursteine</p>
-                    </div>
-                    
-                    <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100" data-aos="fade-up" data-aos-delay="300">
-                        <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                            <i class="fas fa-broom text-primary text-xl"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Reinigung</h3>
-                        <p class="text-gray-600 text-sm">Gründliche Reinigung und Pflege von Fliesen und Natursteinen</p>
-                    </div>
-                    
-                    <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100" data-aos="fade-up" data-aos-delay="400">
-                        <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                            <i class="fas fa-comments text-primary text-xl"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Beratung</h3>
-                        <p class="text-gray-600 text-sm">Kostenlose Beratung bei der Materialauswahl und Planung</p>
-                    </div>
+            <div class="mt-20" id="additional-services-section">
+                <h2 id="services-additional-title" class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-12 text-center"></h2>
+                <div id="services-additional-cards" class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Additional services cards will be loaded dynamically -->
+                </div>
+            </div>
+
+            <!-- Why Choose Us Section (Only for services.html) -->
+            <div class="mt-20 lg:mt-32" id="services-why-choose-section">
+                <div class="text-center mb-12 lg:mb-16" data-aos="fade-up">
+                    <h2 id="services-why-title" class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4"></h2>
+                    <p id="services-why-description" class="text-lg text-gray-600 max-w-2xl mx-auto"></p>
+                </div>
+                <div id="services-why-cards" class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                    <!-- Why choose us cards will be loaded dynamically -->
+                </div>
+            </div>
+
+            <!-- Process Section (Only for services.html) -->
+            <div class="mt-20 lg:mt-32 bg-gradient-to-br from-gray-50 to-white py-16 lg:py-20 rounded-3xl" id="services-process-section">
+                <div class="text-center mb-12 lg:mb-16" data-aos="fade-up">
+                    <h2 id="services-process-title" class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4"></h2>
+                    <p id="services-process-description" class="text-lg text-gray-600 max-w-2xl mx-auto"></p>
+                </div>
+                <div id="services-process-steps" class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+                    <!-- Process steps will be loaded dynamically -->
                 </div>
             </div>
         </div>
@@ -340,39 +161,44 @@
                     <div>
                         <h4 class="font-bold mb-4">Kontakt</h4>
                         <ul class="space-y-2 text-gray-400 text-sm">
-                            <li><a href="contact.html" class="hover:text-white transition-colors">Talstraße 3d</a></li>
-                            <li><a href="contact.html" class="hover:text-white transition-colors">85238 Petershausen</a></li>
-                            <li><a href="tel:081379957477" class="hover:text-white transition-colors">08137 9957477</a></li>
-                            <li><a href="mailto:office@ab-bau.de" class="hover:text-white transition-colors break-all">office@ab-bau.de</a></li>
+                            <li><a id="footer-address" href="contact.html" class="hover:text-white transition-colors">Talstraße 3d, 85238 Petershausen</a></li>
+                            <li><a id="footer-phone" href="tel:081379957477" class="hover:text-white transition-colors">08137 9957477</a></li>
+                            <li><a id="footer-email" href="mailto:office@ab-bau.de" class="hover:text-white transition-colors break-all">office@ab-bau.de</a></li>
                         </ul>
                     </div>
                     <div>
-                        <h4 class="font-bold mb-4">Folgen Sie uns</h4>
-                        <div class="flex space-x-4">
-                            <a href="#" class="w-10 h-10 bg-gray-800 hover:bg-primary rounded-lg flex items-center justify-center transition-all transform hover:scale-110">
-                                <i class="fab fa-facebook-f"></i>
-                            </a>
-                            <a href="#" class="w-10 h-10 bg-gray-800 hover:bg-primary rounded-lg flex items-center justify-center transition-all transform hover:scale-110">
-                                <i class="fab fa-instagram"></i>
-                            </a>
-                        </div>
+                        <h4 class="font-bold mb-4">Rechtliches</h4>
+                        <ul class="space-y-2 text-gray-400 text-sm">
+                            <li><a href="impressum.php" class="hover:text-white transition-colors">Impressum</a></li>
+                            <li><a href="datenschutz.html" class="hover:text-white transition-colors">Datenschutz</a></li>
+                            <li><a href="agb.html" class="hover:text-white transition-colors">AGB</a></li>
+                        </ul>
                     </div>
                 </div>
                 <div class="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
-                    <p>&copy; 2025 AB Bau - Bau und Fliesen UG. Alle Rechte vorbehalten.</p>
+                    <p>&copy; 2025 AB Bau - Bau und Fliesen UG (haftungsbeschränkt). Alle Rechte vorbehalten. | 
+                    <a href="impressum.php" class="hover:text-white transition-colors">Impressum</a> | 
+                    <a href="datenschutz.html" class="hover:text-white transition-colors">Datenschutz</a> | 
+                    <a href="agb.html" class="hover:text-white transition-colors">AGB</a></p>
                 </div>
             </div>
         </div>
     </footer>
 
     <!-- AOS Script -->
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="assets/js/aos.js"></script>
     <script src="js/script.js"></script>
+    <script src="js/admin-api.js"></script>
     <script>
         AOS.init({
             duration: 1000,
             easing: 'ease-in-out',
             once: true
+        });
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof initDynamicContent === 'function') {
+                initDynamicContent();
+            }
         });
     </script>
 </body>

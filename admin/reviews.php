@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 unset($reviews['pending'][$key]);
                 $reviews['pending'] = array_values($reviews['pending']);
                 writeJson('reviews.json', $reviews);
-                $message = 'Review u aprovua me sukses! Ndryshimet reflektohen në index.html';
+                $message = 'Review wurde erfolgreich genehmigt! Änderungen werden in index.html übernommen.';
                 $messageType = 'success';
                 break;
             }
@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 unset($reviews['pending'][$key]);
                 $reviews['pending'] = array_values($reviews['pending']);
                 writeJson('reviews.json', $reviews);
-                $message = 'Review u refuzua!';
+                $message = 'Review wurde abgelehnt!';
                 $messageType = 'success';
                 break;
             }
@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 unset($reviews['approved'][$key]);
                 $reviews['approved'] = array_values($reviews['approved']);
                 writeJson('reviews.json', $reviews);
-                $message = 'Review u fshi me sukses! Ndryshimet reflektohen në index.html';
+                $message = 'Review wurde erfolgreich gelöscht! Änderungen werden in index.html übernommen.';
                 $messageType = 'success';
                 break;
             }
@@ -55,13 +55,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 <!DOCTYPE html>
-<html lang="sq">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $pageTitle; ?> - Admin Panel</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../dist/css/output.css">
+    <link rel="stylesheet" href="../assets/fontawesome/all.min.css">
 </head>
 <body class="bg-gray-100">
     <?php include 'includes/sidebar.php'; ?>
@@ -110,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <input type="hidden" name="action" value="approve">
                                     <input type="hidden" name="id" value="<?php echo $review['id']; ?>">
                                     <button type="submit" class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 font-semibold shadow-lg hover:shadow-xl transition-all">
-                                        <i class="fas fa-save mr-2"></i>Ruaj & Aprovo
+                                        <i class="fas fa-save mr-2"></i>Speichern & Genehmigen
                                     </button>
                                 </form>
                                 <form method="POST" class="inline" onsubmit="return confirm('A jeni të sigurt që dëshironi ta refuzoni?');">
@@ -174,7 +174,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div>
                     <h3 class="text-lg font-bold text-blue-900 mb-2">Informacion</h3>
                     <p class="text-blue-800 mb-3">
-                        Reviews që aprovohen këtu reflektohen automatikisht në <strong>index.html</strong> përmes API-s. 
+                        Reviews, die hier genehmigt werden, werden automatisch in <strong>index.html</strong> über die API übernommen. 
                         Vetëm reviews të aprovuara shfaqen në faqen publike.
                     </p>
                     <a href="../index.html" target="_blank" class="inline-flex items-center bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">

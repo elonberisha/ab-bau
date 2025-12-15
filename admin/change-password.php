@@ -25,23 +25,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $messageType = 'error';
     } else {
         if (updatePassword($newPassword)) {
-            $message = 'Fjalëkalimi u ndryshua me sukses!';
+            $message = 'Passwort wurde erfolgreich geändert!';
             $messageType = 'success';
         } else {
-            $message = 'Gabim në ndryshimin e fjalëkalimit!';
+            $message = 'Fehler beim Ändern des Passworts!';
             $messageType = 'error';
         }
     }
 }
 ?>
 <!DOCTYPE html>
-<html lang="sq">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $pageTitle; ?> - Admin Panel</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../dist/css/output.css">
+    <link rel="stylesheet" href="../assets/fontawesome/all.min.css">
 </head>
 <body class="bg-gray-100">
     <?php include 'includes/sidebar.php'; ?>
@@ -87,8 +87,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                            placeholder="Konfirmoni fjalëkalimin e ri">
                 </div>
                 
-                <button type="submit" class="w-full bg-primary text-white px-4 py-3 rounded-lg hover:bg-primary-dark font-semibold">
-                    <i class="fas fa-save mr-2"></i>Ruaj Ndryshimet
+                <button type="submit" class="w-full bg-gray-800 text-white px-4 py-3 rounded-lg hover:bg-gray-900 font-semibold">
+                    <i class="fas fa-save mr-2"></i>Änderungen speichern
                 </button>
             </form>
         </div>

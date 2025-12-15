@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+/* @tailwindcss v4 directives - ignore linter warnings */
+/* stylelint-disable-next-line */
+@source "../**/*.{html,js,php}";
+/* stylelint-disable-next-line */
+@source "../admin/**/*.{html,js,php}";
+/* stylelint-disable-next-line */
+@source "../api/**/*.{html,js,php}";
+
+/* stylelint-disable-next-line */
+@theme {
+  --color-primary: #0066cc;
+  --color-primary-dark: #004499;
+  --color-primary-light: #3399ff;
+  --color-accent: #ffd700;
+  
+  --font-sans: 'Inter', 'Poppins', sans-serif;
+}
+
+/* Custom styles mbeten në styles.css */

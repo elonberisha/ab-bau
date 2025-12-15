@@ -6,13 +6,13 @@ $stats = getStats();
 $pageTitle = 'Dashboard';
 ?>
 <!DOCTYPE html>
-<html lang="sq">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Admin Panel</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../dist/css/output.css">
+    <link rel="stylesheet" href="../assets/fontawesome/all.min.css">
     <style>
         :root {
             --primary: #0066cc;
@@ -80,26 +80,14 @@ $pageTitle = 'Dashboard';
 
         <!-- Quick Actions -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <a href="gallery.php" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-all transform hover:scale-105">
+            <a href="projekte.php" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-all transform hover:scale-105">
                 <div class="flex items-center space-x-4">
                     <div class="bg-primary bg-opacity-10 p-4 rounded-lg">
-                        <i class="fas fa-images text-3xl text-primary"></i>
+                        <i class="fas fa-briefcase text-3xl text-primary"></i>
                     </div>
                     <div>
-                        <h3 class="text-xl font-bold text-gray-800">Menaxho Galerinë</h3>
-                        <p class="text-gray-600 text-sm">Shto, ndrysho ose fshi fotot</p>
-                    </div>
-                </div>
-            </a>
-            
-            <a href="activities.php" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-all transform hover:scale-105">
-                <div class="flex items-center space-x-4">
-                    <div class="bg-primary bg-opacity-10 p-4 rounded-lg">
-                        <i class="fas fa-tasks text-3xl text-primary"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-bold text-gray-800">Menaxho Veprimtari</h3>
-                        <p class="text-gray-600 text-sm">Shtimi dhe Punimi</p>
+                        <h3 class="text-xl font-bold text-gray-800">Menaxho Projekte</h3>
+                        <p class="text-gray-600 text-sm">Hero & teksti i Projekteve</p>
                     </div>
                 </div>
             </a>
@@ -139,6 +127,17 @@ $pageTitle = 'Dashboard';
                     </div>
                 </div>
             </a>
+            <a href="contact.php" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-all transform hover:scale-105">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-primary bg-opacity-10 p-4 rounded-lg">
+                        <i class="fas fa-address-book text-3xl text-primary"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800">Kontakt</h3>
+                        <p class="text-gray-600 text-sm">Adresa, telefon, email, social</p>
+                    </div>
+                </div>
+            </a>
         </div>
         
         <!-- Info Box -->
@@ -149,7 +148,7 @@ $pageTitle = 'Dashboard';
                     <h3 class="text-lg font-bold text-blue-900 mb-2">Informacion</h3>
                     <p class="text-blue-800">
                         Të gjitha ndryshimet që bëni këtu reflektohen automatikisht në faqen publike (<a href="../index.html" target="_blank" class="underline font-semibold">index.html</a>). 
-                        Fotot, shërbimet dhe reviews lexohen dinamikisht nga API.
+                        Projektet, shërbimet, katalogët dhe reviews lexohen dinamikisht nga API.
                     </p>
                 </div>
             </div>

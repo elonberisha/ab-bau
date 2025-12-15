@@ -7,39 +7,20 @@
     <title>Kontakt - AB Bau | Kostenloses Angebot</title>
     
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="dist/css/output.css">
     
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
-    <!-- AOS Animation Library -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Font Awesome (Local) -->
+    <link rel="stylesheet" href="assets/fontawesome/all.min.css">
+
+    <!-- Google Fonts (Local) -->
+    <link rel="stylesheet" href="assets/css/google-fonts.css">
+
+    <!-- AOS Animation Library (Local) -->
+    <link href="assets/css/aos.css" rel="stylesheet">
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/styles.css">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#0066cc',
-                        'primary-dark': '#004499',
-                        'primary-light': '#3399ff',
-                        accent: '#ffd700',
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'Poppins', 'sans-serif'],
-                    },
-                }
-            }
-        }
-    </script>
 </head>
 <body class="font-sans antialiased">
     
@@ -63,16 +44,13 @@
                         Leistungen
                     </a></li>
                     <li><a href="portfolio.html" class="nav-link px-4 py-2 text-gray-800 hover:text-primary font-medium text-sm xl:text-base transition-all duration-300 rounded-lg hover:bg-gray-50">
-                        Portfolio
+                        Projekte
                     </a></li>
                     <li><a href="catalogs.html" class="nav-link px-4 py-2 text-gray-800 hover:text-primary font-medium text-sm xl:text-base transition-all duration-300 rounded-lg hover:bg-gray-50">
                         Kataloge
                     </a></li>
                     <li><a href="contact.html" class="nav-link px-4 py-2 text-primary font-bold text-sm xl:text-base transition-all duration-300 rounded-lg bg-gray-50">
                         Kontakt
-                    </a></li>
-                    <li class="ml-4"><a href="contact.html" class="bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-3 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 font-semibold text-sm xl:text-base">
-                        Termin vereinbaren
                     </a></li>
                 </ul>
                 
@@ -101,7 +79,7 @@
     <!-- Page Header -->
     <section class="relative pt-32 sm:pt-36 lg:pt-40 pb-16 sm:pb-20 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
         <div class="absolute inset-0">
-            <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=1920&h=600&fit=crop" 
+            <img id="contact-hero-bg" src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=1920&h=600&fit=crop" 
                  alt="Contact Background" 
                  loading="eager"
                  class="w-full h-full object-cover opacity-30">
@@ -109,8 +87,8 @@
         </div>
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
             <div class="text-center text-white" data-aos="fade-up">
-                <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6">Lassen Sie uns sprechen</h1>
-                <p class="text-xl sm:text-2xl text-white/90 max-w-3xl mx-auto">Wir freuen uns auf Ihre Anfrage und erstellen Ihnen gerne ein kostenloses Angebot</p>
+                <h1 id="contact-hero-title" class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6">Lassen Sie uns sprechen</h1>
+                <p id="contact-hero-subtitle" class="text-xl sm:text-2xl text-white/90 max-w-3xl mx-auto">Wir freuen uns auf Ihre Anfrage und erstellen Ihnen gerne ein kostenloses Angebot</p>
             </div>
         </div>
     </section>
@@ -133,7 +111,7 @@
                                     </div>
                                     <div>
                                         <h4 class="font-bold mb-1">Adresse</h4>
-                                        <p class="opacity-90">Talstraße 3d<br>85238 Petershausen</p>
+                                        <p class="opacity-90"><a id="contact-address" href="#" class="hover:underline">Talstraße 3d<br>85238 Petershausen</a></p>
                                     </div>
                                 </div>
                                 <div class="flex items-start space-x-4">
@@ -143,8 +121,8 @@
                                     <div>
                                         <h4 class="font-bold mb-1">Telefon</h4>
                                         <p class="opacity-90">
-                                            <a href="tel:081379957477" class="hover:underline">08137 9957477</a><br>
-                                            <a href="tel:017655537071" class="hover:underline">017655537071</a>
+                                            <a id="contact-phone1" href="tel:081379957477" class="hover:underline">08137 9957477</a><br>
+                                            <a id="contact-phone2" href="tel:017655537071" class="hover:underline">017655537071</a>
                                         </p>
                                     </div>
                                 </div>
@@ -155,24 +133,24 @@
                                     <div>
                                         <h4 class="font-bold mb-1">E-Mail</h4>
                                         <p class="opacity-90">
-                                            <a href="mailto:office@ab-bau.de" class="hover:underline break-all">office@ab-bau.de</a>
+                                            <a id="contact-email" href="mailto:office@ab-bau.de" class="hover:underline break-all">office@ab-bau.de</a>
                                         </p>
                                     </div>
                                 </div>
                                 
                                 <!-- Social Media Icons -->
                                 <div class="flex items-center justify-start space-x-3 sm:space-x-4 pt-4 mt-6 border-t border-white/20">
-                                    <a href="#" target="_blank" class="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center text-white hover:shadow-lg hover:scale-110 transition-all duration-300 transform hover:rotate-6" aria-label="Facebook">
+                                    <a id="contact-facebook" href="#" target="_blank" class="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center text-white hover:shadow-lg hover:scale-110 transition-all duration-300 transform hover:rotate-6" aria-label="Facebook">
                                         <i class="fab fa-facebook-f text-base sm:text-lg"></i>
                                     </a>
-                                    <a href="#" target="_blank" class="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center text-white hover:shadow-lg hover:scale-110 transition-all duration-300 transform hover:rotate-6" aria-label="Instagram">
+                                    <a id="contact-instagram" href="#" target="_blank" class="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center text-white hover:shadow-lg hover:scale-110 transition-all duration-300 transform hover:rotate-6" aria-label="Instagram">
                                         <i class="fab fa-instagram text-base sm:text-lg"></i>
                                     </a>
-                                    <a href="#" target="_blank" class="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center text-white hover:shadow-lg hover:scale-110 transition-all duration-300 transform hover:rotate-6" aria-label="WhatsApp">
+                                    <a id="contact-whatsapp" href="#" target="_blank" class="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center text-white hover:shadow-lg hover:scale-110 transition-all duration-300 transform hover:rotate-6" aria-label="WhatsApp">
                                         <i class="fab fa-whatsapp text-base sm:text-lg"></i>
                                     </a>
-                                    <a href="#" target="_blank" class="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center text-white hover:shadow-lg hover:scale-110 transition-all duration-300 transform hover:rotate-6" aria-label="Viber">
-                                        <i class="fab fa-viber text-base sm:text-lg"></i>
+                                    <a id="contact-linkedin" href="#" target="_blank" class="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center text-white hover:shadow-lg hover:scale-110 transition-all duration-300 transform hover:rotate-6" aria-label="LinkedIn">
+                                        <i class="fab fa-linkedin-in text-base sm:text-lg"></i>
                                     </a>
                                 </div>
                             </div>
@@ -180,26 +158,26 @@
                     </div>
                     
                     <div class="bg-gray-50 p-6 rounded-xl">
-                        <h4 class="font-bold text-gray-900 mb-4">Projektleitung</h4>
-                        <p class="text-gray-700 mb-2">Berat Blakaj</p>
-                        <p class="text-sm text-gray-600">Mit über 15 Jahren Erfahrung in der Branche</p>
+                        <h4 id="contact-project-manager-title" class="font-bold text-gray-900 mb-4">Projektleitung</h4>
+                        <p id="contact-project-manager-name" class="text-gray-700 mb-2">Anduena Blakaj</p>
+                        <p id="contact-project-manager-description" class="text-sm text-gray-600">Mit über 15 Jahren Erfahrung in der Branche</p>
                     </div>
 
                     <!-- Opening Hours -->
                     <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-md">
-                        <h4 class="font-bold text-gray-900 mb-4">Öffnungszeiten</h4>
+                        <h4 id="contact-opening-hours-title" class="font-bold text-gray-900 mb-4">Öffnungszeiten</h4>
                         <div class="space-y-2 text-sm text-gray-600">
                             <div class="flex justify-between">
                                 <span>Montag - Freitag:</span>
-                                <span class="font-semibold">8:00 - 18:00 Uhr</span>
+                                <span id="contact-opening-hours-monday-friday" class="font-semibold">8:00 - 18:00 Uhr</span>
                             </div>
                             <div class="flex justify-between">
                                 <span>Samstag:</span>
-                                <span class="font-semibold">9:00 - 14:00 Uhr</span>
+                                <span id="contact-opening-hours-saturday" class="font-semibold">9:00 - 14:00 Uhr</span>
                             </div>
                             <div class="flex justify-between">
                                 <span>Sonntag:</span>
-                                <span class="font-semibold">Geschlossen</span>
+                                <span id="contact-opening-hours-sunday" class="font-semibold">Geschlossen</span>
                             </div>
                         </div>
                     </div>
@@ -208,7 +186,7 @@
                 <!-- Contact Form -->
                 <div data-aos="fade-left">
                     <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-                        <h3 class="text-2xl font-bold text-gray-900 mb-6">Kostenloses Angebot anfordern</h3>
+                        <h3 id="contact-form-title" class="text-2xl font-bold text-gray-900 mb-6">Kostenloses Angebot anfordern</h3>
                         <form id="contactForm" class="space-y-6">
                             <div>
                                 <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Ihr Name *</label>
@@ -241,7 +219,7 @@
                                     class="w-full px-6 py-4 rounded-xl border-2 border-gray-200 focus:border-primary focus:outline-none transition-colors bg-white resize-none"></textarea>
                             </div>
                             <button type="submit" class="w-full bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-white px-8 py-4 rounded-lg font-bold text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1 hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-2 group">
-                                <span>Anfrage senden</span>
+                                <span id="contact-form-button">Anfrage senden</span>
                                 <i class="fas fa-paper-plane group-hover:translate-x-1 transition-transform"></i>
                             </button>
                         </form>
@@ -303,32 +281,38 @@
                         </ul>
                     </div>
                     <div>
-                        <h4 class="font-bold mb-4">Folgen Sie uns</h4>
-                        <div class="flex space-x-4">
-                            <a href="#" class="w-10 h-10 bg-gray-800 hover:bg-primary rounded-lg flex items-center justify-center transition-all transform hover:scale-110">
-                                <i class="fab fa-facebook-f"></i>
-                            </a>
-                            <a href="#" class="w-10 h-10 bg-gray-800 hover:bg-primary rounded-lg flex items-center justify-center transition-all transform hover:scale-110">
-                                <i class="fab fa-instagram"></i>
-                            </a>
-                        </div>
+                        <h4 class="font-bold mb-4">Rechtliches</h4>
+                        <ul class="space-y-2 text-gray-400 text-sm">
+                            <li><a href="impressum.php" class="hover:text-white transition-colors">Impressum</a></li>
+                            <li><a href="datenschutz.html" class="hover:text-white transition-colors">Datenschutz</a></li>
+                            <li><a href="agb.html" class="hover:text-white transition-colors">AGB</a></li>
+                        </ul>
                     </div>
                 </div>
                 <div class="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
-                    <p>&copy; 2025 AB Bau - Bau und Fliesen UG. Alle Rechte vorbehalten.</p>
+                    <p>&copy; 2025 AB Bau - Bau und Fliesen UG (haftungsbeschränkt). Alle Rechte vorbehalten. | 
+                    <a href="impressum.php" class="hover:text-white transition-colors">Impressum</a> | 
+                    <a href="datenschutz.html" class="hover:text-white transition-colors">Datenschutz</a> | 
+                    <a href="agb.html" class="hover:text-white transition-colors">AGB</a></p>
                 </div>
             </div>
         </div>
     </footer>
 
     <!-- AOS Script -->
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="assets/js/aos.js"></script>
     <script src="js/script.js"></script>
+    <script src="js/admin-api.js"></script>
     <script>
         AOS.init({
             duration: 1000,
             easing: 'ease-in-out',
             once: true
+        });
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof initDynamicContent === 'function') {
+                initDynamicContent();
+            }
         });
     </script>
 </body>

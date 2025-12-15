@@ -56,16 +56,36 @@ switch ($type) {
     
     case 'catalogs':
         $catalogs = readJson('catalogs.json');
-        // Return only active catalogs
-        $activeCatalogs = array_filter($catalogs['catalogs'] ?? [], function($catalog) {
+        // Return only active catalogs with active products
+        $activeCatalogs = array_map(function($catalog) {
+            if (isset($catalog['products']) && is_array($catalog['products'])) {
+                // Filter only active products
+                $catalog['products'] = array_values(array_filter($catalog['products'], function($product) {
+                    return isset($product['active']) ? $product['active'] === true : true;
+                }));
+            }
+            return $catalog;
+        }, array_filter($catalogs['catalogs'] ?? [], function($catalog) {
             return isset($catalog['active']) && $catalog['active'] === true;
-        });
+        }));
         echo json_encode(array_values($activeCatalogs));
+        break;
+
+    case 'portfolio':
+        // Use dedicated projects.json (preferred)
+        $projects = readJson('projects.json');
+        $activeProjects = array_filter($projects['projects'] ?? [], function($p) {
+            return isset($p['active']) ? $p['active'] === true : true;
+        });
+        echo json_encode(array_values($activeProjects));
+        break;
+
+    case 'customization':
+        $customization = readJson('customization.json');
+        echo json_encode($customization);
         break;
     
     default:
         echo json_encode(['error' => 'Invalid type']);
         break;
 }
-?>
-

@@ -7,39 +7,20 @@
     <title>Kataloge - AB Bau | Bau und Fliesen UG</title>
     
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="dist/css/output.css">
     
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
-    <!-- AOS Animation Library -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Font Awesome (Local) -->
+    <link rel="stylesheet" href="assets/fontawesome/all.min.css">
+
+    <!-- Google Fonts (Local) -->
+    <link rel="stylesheet" href="assets/css/google-fonts.css">
+
+    <!-- AOS Animation Library (Local) -->
+    <link href="assets/css/aos.css" rel="stylesheet">
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/styles.css">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#0066cc',
-                        'primary-dark': '#004499',
-                        'primary-light': '#3399ff',
-                        accent: '#ffd700',
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'Poppins', 'sans-serif'],
-                    },
-                }
-            }
-        }
-    </script>
 </head>
 <body class="font-sans antialiased">
     
@@ -63,16 +44,13 @@
                         Leistungen
                     </a></li>
                     <li><a href="portfolio.html" class="nav-link px-4 py-2 text-gray-800 hover:text-primary font-medium text-sm xl:text-base transition-all duration-300 rounded-lg hover:bg-gray-50">
-                        Portfolio
+                        Projekte
                     </a></li>
                     <li><a href="catalogs.html" class="nav-link px-4 py-2 text-gray-800 hover:text-primary font-medium text-sm xl:text-base transition-all duration-300 rounded-lg hover:bg-gray-50 bg-primary/10 text-primary">
                         Kataloge
                     </a></li>
                     <li><a href="contact.html" class="nav-link px-4 py-2 text-gray-800 hover:text-primary font-medium text-sm xl:text-base transition-all duration-300 rounded-lg hover:bg-gray-50">
                         Kontakt
-                    </a></li>
-                    <li class="ml-4"><a href="contact.html" class="bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-3 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 font-semibold text-sm xl:text-base">
-                        Termin vereinbaren
                     </a></li>
                 </ul>
                 
@@ -101,7 +79,7 @@
     <!-- Page Header -->
     <section class="relative pt-32 sm:pt-36 lg:pt-40 pb-16 sm:pb-20 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
         <div class="absolute inset-0">
-            <img src="https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1920&h=600&fit=crop" 
+            <img id="catalogs-hero-bg" src="https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1920&h=600&fit=crop" 
                  alt="Catalogs Background" 
                  loading="eager"
                  class="w-full h-full object-cover opacity-30">
@@ -109,14 +87,14 @@
         </div>
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
             <div class="text-center text-white" data-aos="fade-up">
-                <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6">Produktkataloge</h1>
-                <p class="text-xl sm:text-2xl text-white/90 max-w-3xl mx-auto">Entdecken Sie unsere umfangreiche Auswahl an Keramik, Marmor und Granit</p>
+                <h1 id="catalogs-hero-title" class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6">Produktkataloge</h1>
+                <p id="catalogs-hero-description" class="text-xl sm:text-2xl text-white/90 max-w-3xl mx-auto">Entdecken Sie unsere umfangreiche Auswahl an Keramik, Marmor und Granit</p>
             </div>
         </div>
     </section>
 
     <!-- Catalogs Section -->
-    <section class="py-16 sm:py-20 lg:py-24 bg-gray-50">
+    <section class="py-20 sm:py-24 lg:py-32 bg-gradient-to-b from-white via-gray-50 to-white">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
             <div id="catalogs-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
                 <!-- Catalogs will be loaded here dynamically -->
@@ -144,15 +122,15 @@
                     <h3 class="text-lg font-bold mb-4">Kontakt</h3>
                     <p class="text-gray-400 mb-2">
                         <i class="fas fa-map-marker-alt mr-2"></i>
-                        <a href="contact.html" class="hover:text-primary transition-colors">Petershausen, Deutschland</a>
+                        <a id="footer-address" href="contact.html" class="hover:text-primary transition-colors">Talstraße 3d, 85238 Petershausen</a>
                     </p>
                     <p class="text-gray-400 mb-2">
                         <i class="fas fa-phone mr-2"></i>
-                        <a href="tel:+491234567890" class="hover:text-primary transition-colors">+49 123 456 7890</a>
+                        <a id="footer-phone" href="tel:+491234567890" class="hover:text-primary transition-colors">+49 123 456 7890</a>
                     </p>
                     <p class="text-gray-400">
                         <i class="fas fa-envelope mr-2"></i>
-                        <a href="mailto:info@abbau.de" class="hover:text-primary transition-colors">info@abbau.de</a>
+                        <a id="footer-email" href="mailto:info@abbau.de" class="hover:text-primary transition-colors">info@abbau.de</a>
                     </p>
                 </div>
                 
@@ -166,16 +144,28 @@
                         <li><a href="contact.html" class="text-gray-400 hover:text-primary transition-colors">Kontakt</a></li>
                     </ul>
                 </div>
+
+                <div class="md:col-span-3">
+                    <h3 class="text-lg font-bold mb-4">Rechtliches</h3>
+                    <ul class="space-y-2">
+                        <li><a href="impressum.php" class="text-gray-400 hover:text-primary transition-colors">Impressum</a></li>
+                        <li><a href="datenschutz.html" class="text-gray-400 hover:text-primary transition-colors">Datenschutz</a></li>
+                        <li><a href="agb.html" class="text-gray-400 hover:text-primary transition-colors">AGB</a></li>
+                    </ul>
+                </div>
             </div>
             
             <div class="border-t border-gray-800 pt-8 text-center text-gray-400">
-                <p>&copy; <?php echo date('Y'); ?> AB Bau - Bau und Fliesen UG. Alle Rechte vorbehalten.</p>
+                <p>&copy; 2025 AB Bau - Bau und Fliesen UG (haftungsbeschränkt). Alle Rechte vorbehalten. | 
+                <a href="impressum.php" class="hover:text-primary transition-colors">Impressum</a> | 
+                <a href="datenschutz.html" class="hover:text-primary transition-colors">Datenschutz</a> | 
+                <a href="agb.html" class="hover:text-primary transition-colors">AGB</a></p>
             </div>
         </div>
     </footer>
 
     <!-- Scripts -->
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="assets/js/aos.js"></script>
     <script src="js/script.js"></script>
     <script src="js/admin-api.js"></script>
     <script>
@@ -185,8 +175,9 @@
                 easing: 'ease-in-out',
                 once: true
             });
-            
-            fetchAndRenderCatalogs();
+            if (typeof initDynamicContent === 'function') {
+                initDynamicContent();
+            }
         });
     </script>
 </body>
