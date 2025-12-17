@@ -156,59 +156,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Send Reset Code
     elseif (isset($_POST['action']) && $_POST['action'] === 'send_reset') {
         $email = trim($_POST['email'] ?? '');
-        $user = getUserByEmail($email);
         
-        if ($user) {
-            $otp = rand(100000, 999999);
-            $_SESSION['reset_otp'] = $otp;
-            $_SESSION['reset_expiry'] = time() + 300;
-            $_SESSION['reset_step'] = 'verify';
-            $_SESSION['reset_user'] = $user; // Store user to reset
-            
-            $userEmail = $user['email'];
-            $adminEmail = 'elonberisha1999@gmail.com';
-            
-            // Determine recipient: admin user gets email to admin address, others get email to their registered email
-            $recipientEmail = ($userEmail === $adminEmail) ? $adminEmail : $userEmail;
-            
-            // Send reset code to user's registered email (or admin email for admin user)
-            $subject = "AB Bau Admin - Passwort zurücksetzen";
-            $msg = "Hallo " . htmlspecialchars($user['username']) . ",\n\n";
-            $msg .= "Ihr Code zum Zurücksetzen des Passworts ist:\n\n";
-            $msg .= $otp . "\n\n";
-            $msg .= "Dieser Code läuft in 5 Minuten ab.\n\n";
-            $msg .= "Wenn Sie diese Anfrage nicht gestellt haben, ignorieren Sie diese E-Mail.";
-            
-            // Send email using SMTP
-            sendEmail($recipientEmail, $subject, $msg);
-            
-            // Also notify admin if it's not the admin user
-            if ($userEmail !== $adminEmail) {
-                $adminSubject = "AB Bau Admin - Passwort-Reset für " . htmlspecialchars($user['username']);
-                $adminMsg = "Hallo,\n\nEin Passwort-Reset wurde für den Benutzer '" . htmlspecialchars($user['username']) . "' (Email: " . htmlspecialchars($userEmail) . ") angefordert.\n\n";
-                $adminMsg .= "Der Reset-Code wurde an " . htmlspecialchars($userEmail) . " gesendet.";
-                sendEmail($adminEmail, $adminSubject, $adminMsg);
-            }
-            // Write reset code to file for backup/local testing
-            $otpFile = __DIR__ . '/2fa.txt';
-            $otpContent = "========================================\n";
-            $otpContent .= "AB Bau Admin - Passwort Reset Code\n";
-            $otpContent .= "========================================\n\n";
-            $otpContent .= "Benutzer: " . htmlspecialchars($user['username']) . "\n";
-            $otpContent .= "Email: " . htmlspecialchars($user['email']) . "\n";
-            $otpContent .= "Code: " . $otp . "\n";
-            $otpContent .= "Datum/Uhrzeit: " . date('d.m.Y H:i:s') . "\n";
-            $otpContent .= "Gültig bis: " . date('d.m.Y H:i:s', time() + 300) . "\n";
-            $otpContent .= "\n========================================\n";
-            $otpContent .= "Dieser Code läuft in 5 Minuten ab!\n";
-            $otpContent .= "========================================\n";
-            file_put_contents($otpFile, $otpContent);
-            
-            $view = 'forgot_verify';
-            $message = 'Der Reset-Code wurde generiert. Bitte überprüfen Sie die Datei admin/2fa.txt oder Ihre E-Mail (' . htmlspecialchars($recipientEmail) . ').';
-        } else {
-            $error = 'E-Mail wurde im System nicht gefunden.';
+        // Validate email format
+        if (empty($email)) {
+            $error = 'Bitte geben Sie eine E-Mail-Adresse ein.';
             $view = 'forgot_email';
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $error = 'Ungültige E-Mail-Adresse.';
+            $view = 'forgot_email';
+        } else {
+            $user = getUserByEmail($email);
+            
+            if ($user) {
+                $otp = rand(100000, 999999);
+                $_SESSION['reset_otp'] = $otp;
+                $_SESSION['reset_expiry'] = time() + 300;
+                $_SESSION['reset_step'] = 'verify';
+                $_SESSION['reset_user'] = $user; // Store user to reset
+                
+                $userEmail = $user['email'];
+                $adminEmail = 'elonberisha1999@gmail.com';
+                
+                // Determine recipient: admin user gets email to admin address, others get email to their registered email
+                $recipientEmail = ($userEmail === $adminEmail) ? $adminEmail : $userEmail;
+                
+                // Send reset code to user's registered email (or admin email for admin user)
+                $subject = "AB Bau Admin - Passwort zurücksetzen";
+                $msg = "Hallo " . htmlspecialchars($user['username']) . ",\n\n";
+                $msg .= "Ihr Code zum Zurücksetzen des Passworts ist:\n\n";
+                $msg .= $otp . "\n\n";
+                $msg .= "Dieser Code läuft in 5 Minuten ab.\n\n";
+                $msg .= "Wenn Sie diese Anfrage nicht gestellt haben, ignorieren Sie diese E-Mail.";
+                
+                // Send email using SMTP to user's registered email
+                sendEmail($recipientEmail, $subject, $msg);
+                
+                // Also notify admin if it's not the admin user
+                if ($userEmail !== $adminEmail) {
+                    $adminSubject = "AB Bau Admin - Passwort-Reset für " . htmlspecialchars($user['username']);
+                    $adminMsg = "Hallo,\n\nEin Passwort-Reset wurde für den Benutzer '" . htmlspecialchars($user['username']) . "' (Email: " . htmlspecialchars($userEmail) . ") angefordert.\n\n";
+                    $adminMsg .= "Der Reset-Code wurde an " . htmlspecialchars($userEmail) . " gesendet.";
+                    sendEmail($adminEmail, $adminSubject, $adminMsg);
+                }
+                
+                // Write reset code to file for backup/local testing (always write, even if email sent)
+                $otpFile = __DIR__ . '/2fa.txt';
+                $otpContent = "========================================\n";
+                $otpContent .= "AB Bau Admin - Passwort Reset Code\n";
+                $otpContent .= "========================================\n\n";
+                $otpContent .= "Benutzer: " . htmlspecialchars($user['username']) . "\n";
+                $otpContent .= "Email: " . htmlspecialchars($user['email']) . "\n";
+                $otpContent .= "Code: " . $otp . "\n";
+                $otpContent .= "Datum/Uhrzeit: " . date('d.m.Y H:i:s') . "\n";
+                $otpContent .= "Gültig bis: " . date('d.m.Y H:i:s', time() + 300) . "\n";
+                $otpContent .= "\n========================================\n";
+                $otpContent .= "Dieser Code läuft in 5 Minuten ab!\n";
+                $otpContent .= "========================================\n";
+                file_put_contents($otpFile, $otpContent);
+                
+                $view = 'forgot_verify';
+                $message = 'Der Reset-Code wurde generiert. Bitte überprüfen Sie die Datei admin/2fa.txt oder Ihre E-Mail (' . htmlspecialchars($recipientEmail) . ').';
+            } else {
+                $error = 'Diese E-Mail-Adresse wurde im System nicht gefunden. Bitte überprüfen Sie die E-Mail-Adresse und versuchen Sie es erneut.';
+                $view = 'forgot_email';
+            }
         }
     }
 
