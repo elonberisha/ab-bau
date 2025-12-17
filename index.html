@@ -910,7 +910,20 @@
         async function loadCatalogsPreview() {
             try {
                 const response = await fetch('api/get-data.php?type=catalogs');
-                const catalogs = await response.json();
+                const data = await response.json();
+                
+                // Check if response is an error object
+                if (data.error) {
+                    console.error('API Error:', data.error);
+                    const container = document.getElementById('catalogs-preview-grid');
+                    if (container) {
+                        container.innerHTML = '<p class="text-gray-500 text-center py-8 col-span-full">Fehler beim Laden der Kataloge.</p>';
+                    }
+                    return;
+                }
+                
+                // Ensure catalogs is an array
+                const catalogs = Array.isArray(data) ? data : [];
                 const previewCatalogs = catalogs.slice(0, 3); // Show first 3
                 const container = document.getElementById('catalogs-preview-grid');
 
@@ -963,7 +976,20 @@
         window.loadReviews = async function () {
             try {
                 const response = await fetch('api/get-data.php?type=reviews');
-                const reviews = await response.json();
+                const data = await response.json();
+                
+                // Check if response is an error object
+                if (data.error) {
+                    console.error('API Error:', data.error);
+                    const container = document.getElementById('reviews-display');
+                    if (container) {
+                        container.innerHTML = '<p class="text-gray-500 text-center py-8 col-span-full">Fehler beim Laden der Bewertungen.</p>';
+                    }
+                    return;
+                }
+                
+                // Ensure reviews is an array
+                const reviews = Array.isArray(data) ? data : [];
                 const container = document.getElementById('reviews-display');
 
                 if (!container) return;

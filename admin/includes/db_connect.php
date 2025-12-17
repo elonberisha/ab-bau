@@ -6,9 +6,9 @@
 // Check if environment variables are set (for production)
 // If not set, use local development defaults (XAMPP)
 $db_host = getenv('DB_HOST') ?: 'localhost';
-$db_user = getenv('DB_USER') ?: 'root';
-$db_pass = getenv('DB_PASS') ?: '';
-$db_name = getenv('DB_NAME') ?: 'ab-bau';
+$db_user = getenv('DB_USER') ?: 'u626536477_ab_bau';
+$db_pass = getenv('DB_PASS') ?: 'Ab_bau.123';
+$db_name = getenv('DB_NAME') ?: 'u626536477_ab_bau';
 
 // For production, set environment variables or uncomment and update these:
 // $db_host = 'your_production_host';

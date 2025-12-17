@@ -19,7 +19,13 @@ async function fetchServices() {
     try {
         const response = await fetch(`${API_BASE}get-data.php?type=services`);
         const data = await response.json();
-        return data || [];
+        // Check if response is an error object
+        if (data.error) {
+            console.error('API Error:', data.error);
+            return [];
+        }
+        // Ensure data is an array
+        return Array.isArray(data) ? data : [];
     } catch (error) {
         console.error('Error fetching services:', error);
         return [];
@@ -31,7 +37,13 @@ async function fetchReviews() {
     try {
         const response = await fetch(`${API_BASE}get-data.php?type=reviews`);
         const data = await response.json();
-        return data || [];
+        // Check if response is an error object
+        if (data.error) {
+            console.error('API Error:', data.error);
+            return [];
+        }
+        // Ensure data is an array
+        return Array.isArray(data) ? data : [];
     } catch (error) {
         console.error('Error fetching reviews:', error);
         return [];
@@ -149,11 +161,18 @@ function renderReviews(reviews, containerId) {
 }
 
 // Fetch catalogs
+// Fetch catalogs
 async function fetchCatalogs() {
     try {
         const response = await fetch(`${API_BASE}get-data.php?type=catalogs`);
         const data = await response.json();
-        return data || [];
+        // Check if response is an error object
+        if (data.error) {
+            console.error('API Error:', data.error);
+            return [];
+        }
+        // Ensure data is an array
+        return Array.isArray(data) ? data : [];
     } catch (error) {
         console.error('Error fetching catalogs:', error);
         return [];
@@ -165,7 +184,13 @@ async function fetchPortfolio() {
     try {
         const response = await fetch(`${API_BASE}get-data.php?type=portfolio`);
         const data = await response.json();
-        return data || [];
+        // Check if response is an error object
+        if (data.error) {
+            console.error('API Error:', data.error);
+            return [];
+        }
+        // Ensure data is an array
+        return Array.isArray(data) ? data : [];
     } catch (error) {
         console.error('Error fetching portfolio:', error);
         return [];

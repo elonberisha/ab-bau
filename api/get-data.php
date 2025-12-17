@@ -30,19 +30,30 @@ try {
             break;
         
         case 'reviews':
-            $stmt = $pdo->query("SELECT name, message, rating, DATE_FORMAT(date, '%Y-%m-%d') as date FROM reviews WHERE status = 'approved' ORDER BY date DESC");
-            echo json_encode($stmt->fetchAll());
+            try {
+                $stmt = $pdo->query("SELECT name, message, rating, DATE_FORMAT(date, '%Y-%m-%d') as date FROM reviews WHERE status = 'approved' ORDER BY date DESC");
+                $reviews = $stmt->fetchAll();
+                echo json_encode($reviews ? $reviews : []);
+            } catch (PDOException $e) {
+                echo json_encode([]);
+            }
             break;
         
         case 'catalogs':
-            $stmt = $pdo->query("SELECT * FROM catalogs WHERE active = 1 ORDER BY sort_order ASC");
-            $catalogs = $stmt->fetchAll();
-            foreach ($catalogs as &$catalog) {
-                $pStmt = $pdo->prepare("SELECT * FROM catalog_products WHERE catalog_id = :cid AND active = 1 ORDER BY sort_order ASC");
-                $pStmt->execute(['cid' => $catalog['id']]);
-                $catalog['products'] = $pStmt->fetchAll();
+            try {
+                $stmt = $pdo->query("SELECT * FROM catalogs WHERE active = 1 ORDER BY sort_order ASC");
+                $catalogs = $stmt->fetchAll();
+                if ($catalogs) {
+                    foreach ($catalogs as &$catalog) {
+                        $pStmt = $pdo->prepare("SELECT * FROM catalog_products WHERE catalog_id = :cid AND active = 1 ORDER BY sort_order ASC");
+                        $pStmt->execute(['cid' => $catalog['id']]);
+                        $catalog['products'] = $pStmt->fetchAll();
+                    }
+                }
+                echo json_encode($catalogs ? $catalogs : []);
+            } catch (PDOException $e) {
+                echo json_encode([]);
             }
-            echo json_encode($catalogs);
             break;
     
         case 'portfolio':
