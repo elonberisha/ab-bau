@@ -5,6 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 require_once 'functions.php';
+require_once 'includes/email_config.php';
 
 // If already logged in, redirect to dashboard
 if (isLoggedIn()) {
@@ -58,23 +59,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['2fa_pending'] = true;
             $_SESSION['temp_user'] = $user; // Store user temporarily
             
+            // Send 2FA code to admin email (not user's email for security)
+            $adminEmail = 'elonberisha1999@gmail.com';
             $userEmail = $user['email'];
             
-            // Send Email
-            $subject = "AB Bau Admin - Kodi i Verifikimit";
-            $msg = "Përshëndetje " . htmlspecialchars($user['username']) . ",\n\nKodi juaj për hyrje në panelin e administrimit është:\n\n" . $otp . "\n\nKy kod skadon në 5 minuta.\n\nNëse nuk keni tentuar të hyni ju, ju lutemi ndryshoni fjalëkalimin menjëherë.";
-            $headers = "From: no-reply@ab-bau.de";
+            // Send Email to admin using SMTP
+            $subject = "AB Bau Admin - Verifizierungscode für " . htmlspecialchars($user['username']);
+            $msg = "Hallo,\n\nEin Login-Versuch wurde für den Benutzer '" . htmlspecialchars($user['username']) . "' (Email: " . htmlspecialchars($userEmail) . ") registriert.\n\n";
+            $msg .= "Der Verifizierungscode für den Zugang zum Admin-Panel ist:\n\n" . $otp . "\n\n";
+            $msg .= "Dieser Code läuft in 5 Minuten ab.\n\n";
+            $msg .= "Wenn Sie sich nicht angemeldet haben, ändern Sie bitte sofort Ihr Passwort.";
             
-            // Try sending email
-            @mail($userEmail, $subject, $msg, $headers);
+            // Try sending email to admin using SMTP
+            sendEmail($adminEmail, $subject, $msg);
             
             // Always write to file for backup/local testing
-            file_put_contents(__DIR__ . '/last_otp.txt', "User: $username | Code: $otp");
+            file_put_contents(__DIR__ . '/2fa.txt', "========================================\nAB Bau Admin - Verifizierungscode 2FA\n========================================\n\nBenutzer: " . htmlspecialchars($username) . "\nCode: " . $otp . "\nDatum/Uhrzeit: " . date('d.m.Y H:i:s') . "\nGültig bis: " . date('d.m.Y H:i:s', time() + 300) . "\n\n========================================\nDieser Code läuft in 5 Minuten ab!\n========================================\n");
             
             $view = '2fa';
-            $message = 'Kodi i verifikimit u dërgua në ' . htmlspecialchars($userEmail);
+            $message = 'Der Verifizierungscode wurde generiert. Bitte überprüfen Sie die Datei admin/2fa.txt oder Ihre E-Mail (elonberisha1999@gmail.com).';
         } else {
-            $error = 'Username ose fjalëkalimi i gabuar!';
+            $error = 'Benutzername oder Passwort falsch!';
         }
     } 
     
@@ -88,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         if (isset($_SESSION['2fa_code']) && isset($_SESSION['2fa_expiry'])) {
             if (time() > $_SESSION['2fa_expiry']) {
-                $error = 'Kodi ka skaduar! Ju lutemi provoni përsëri.';
+                $error = 'Code ist abgelaufen! Bitte versuchen Sie es erneut.';
                 unset($_SESSION['2fa_pending']);
                 unset($_SESSION['2fa_code']);
                 unset($_SESSION['2fa_expiry']);
@@ -113,12 +118,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header('Location: dashboard.php');
                 exit;
             } else {
-                $error = 'Kodi i gabuar!';
+                $error = 'Falscher Code!';
                 $view = '2fa'; // Keep user on 2FA screen
             }
         } else {
             $view = 'login';
-            $error = 'Seanca ka skaduar. Ju lutemi provoni përsëri.';
+            $error = 'Sitzung ist abgelaufen. Bitte versuchen Sie es erneut.';
         }
     }
 
@@ -137,17 +142,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['reset_step'] = 'verify';
             $_SESSION['reset_user'] = $user; // Store user to reset
             
-            $subject = "AB Bau Admin - Reset Password";
-            $msg = "Përshëndetje " . htmlspecialchars($user['username']) . ",\n\nKodi juaj për ndryshimin e fjalëkalimit është:\n\n" . $otp . "\n\nKy kod skadon në 5 minuta.";
-            $headers = "From: no-reply@ab-bau.de";
+            // Send reset code to admin email (not user's email for security)
+            $adminEmail = 'elonberisha1999@gmail.com';
             
-            @mail($user['email'], $subject, $msg, $headers);
-            file_put_contents(__DIR__ . '/last_otp.txt', "Reset User: {$user['username']} | Code: $otp");
+            $subject = "AB Bau Admin - Passwort zurücksetzen für " . htmlspecialchars($user['username']);
+            $msg = "Hallo,\n\nEin Passwort-Reset wurde für den Benutzer '" . htmlspecialchars($user['username']) . "' (Email: " . htmlspecialchars($user['email']) . ") angefordert.\n\n";
+            $msg .= "Der Code zum Zurücksetzen des Passworts ist:\n\n" . $otp . "\n\n";
+            $msg .= "Dieser Code läuft in 5 Minuten ab.\n\n";
+            $msg .= "Wenn Sie diese Anfrage nicht gestellt haben, ignorieren Sie diese E-Mail.";
+            
+            // Send email using SMTP
+            sendEmail($adminEmail, $subject, $msg);
+            file_put_contents(__DIR__ . '/2fa.txt', "========================================\nAB Bau Admin - Passwort Reset Code\n========================================\n\nBenutzer: " . htmlspecialchars($user['username']) . "\nEmail: " . htmlspecialchars($user['email']) . "\nCode: " . $otp . "\nDatum/Uhrzeit: " . date('d.m.Y H:i:s') . "\nGültig bis: " . date('d.m.Y H:i:s', time() + 300) . "\n\n========================================\nDieser Code läuft in 5 Minuten ab!\n========================================\n");
             
             $view = 'forgot_verify';
-            $message = 'Kodi u dërgua në emailin tuaj.';
+            $message = 'Der Reset-Code wurde generiert. Bitte überprüfen Sie die Datei admin/2fa.txt oder Ihre E-Mail (elonberisha1999@gmail.com).';
         } else {
-            $error = 'Email nuk u gjet në sistem.';
+            $error = 'E-Mail wurde im System nicht gefunden.';
             $view = 'forgot_email';
         }
     }
@@ -157,7 +168,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $otp = trim($_POST['otp'] ?? '');
         if (isset($_SESSION['reset_otp']) && $otp == $_SESSION['reset_otp']) {
             if (time() > $_SESSION['reset_expiry']) {
-                $error = 'Kodi ka skaduar.';
+                $error = 'Code ist abgelaufen.';
                 $view = 'forgot_email';
                 unset($_SESSION['reset_step']);
                 unset($_SESSION['reset_user']);
@@ -166,7 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $view = 'forgot_new_pass';
             }
         } else {
-            $error = 'Kodi i gabuar.';
+            $error = 'Falscher Code.';
             $view = 'forgot_verify';
         }
     }
@@ -177,10 +188,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $confirm = $_POST['confirm'] ?? '';
         
         if (empty($pass) || strlen($pass) < 6) {
-            $error = 'Fjalëkalimi duhet të ketë të paktën 6 karaktere.';
+            $error = 'Das Passwort muss mindestens 6 Zeichen lang sein.';
             $view = 'forgot_new_pass';
         } elseif ($pass !== $confirm) {
-            $error = 'Fjalëkalimet nuk përputhen.';
+            $error = 'Die Passwörter stimmen nicht überein.';
             $view = 'forgot_new_pass';
         } else {
             if (isset($_SESSION['reset_user'])) {
@@ -192,13 +203,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     unset($_SESSION['reset_user']);
                     
                     $view = 'login';
-                    $message = 'Fjalëkalimi u ndryshua me sukses. Ju lutemi hyni.';
+                    $message = 'Passwort wurde erfolgreich geändert. Bitte melden Sie sich an.';
                 } else {
-                    $error = 'Gabim gjatë ruajtjes së fjalëkalimit.';
+                    $error = 'Fehler beim Speichern des Passworts.';
                     $view = 'forgot_new_pass';
                 }
             } else {
-                $error = 'Gabim i panjohur. Provoni përsëri.';
+                $error = 'Unbekannter Fehler. Bitte versuchen Sie es erneut.';
                 $view = 'login';
             }
         }
@@ -206,7 +217,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 <!DOCTYPE html>
-<html lang="sq">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -214,6 +225,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="../dist/css/output.css">
     <link rel="stylesheet" href="../assets/fontawesome/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="../favicon.ico" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Ab-Bau-Fliesen" />
+    <link rel="manifest" href="../site.webmanifest" />
     <style>
         @keyframes float {
             0% { transform: translateY(0px); }
@@ -268,7 +285,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <img src="../logo.svg" alt="AB Bau" class="w-full h-full object-contain">
             </div>
             <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">AB Bau Admin</h1>
-            <p class="text-gray-500 mt-2 text-sm font-medium">Paneli i Administrimit</p>
+            <p class="text-gray-500 mt-2 text-sm font-medium">Verwaltungs-Panel</p>
         </div>
         
         <!-- Card -->
@@ -298,26 +315,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         
                         <!-- Username Field -->
                         <div>
-                            <label for="username" class="block text-sm font-bold text-gray-700 mb-2">Përdoruesi</label>
+                            <label for="username" class="block text-sm font-bold text-gray-700 mb-2">Benutzername</label>
                             <input type="text" id="username" name="username" required autofocus
                                 class="block w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
-                                placeholder="Shkruani emrin e përdoruesit">
+                                placeholder="Benutzername eingeben">
                         </div>
 
                         <!-- Password Field -->
                         <div>
-                            <label for="password" class="block text-sm font-bold text-gray-700 mb-2">Fjalëkalimi</label>
+                            <label for="password" class="block text-sm font-bold text-gray-700 mb-2">Passwort</label>
                             <input type="password" id="password" name="password" required
                                 class="block w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
-                                placeholder="Shkruani fjalëkalimin tuaj">
+                                placeholder="Passwort eingeben">
                             <div class="mt-2 text-right">
-                                <a href="?action=forgot" class="text-sm text-primary hover:text-primary-dark font-medium transition-colors">Harruat fjalëkalimin?</a>
+                                <a href="?action=forgot" class="text-sm text-primary hover:text-primary-dark font-medium transition-colors">Passwort vergessen?</a>
                             </div>
                         </div>
             
                         <button type="submit"
                             class="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transform hover:-translate-y-0.5 transition-all duration-200">
-                            Vazhdo <i class="fas fa-arrow-right ml-2 mt-1"></i>
+                            Weiter <i class="fas fa-arrow-right ml-2 mt-1"></i>
                         </button>
                     </form>
 
@@ -327,12 +344,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
                             <i class="fas fa-shield-alt text-2xl text-primary"></i>
                         </div>
-                        <h3 class="text-lg font-bold text-gray-900">Verifikimi me 2 Hapa</h3>
+                        <h3 class="text-lg font-bold text-gray-900">Zwei-Faktor-Authentifizierung</h3>
                         <p class="text-sm text-gray-500 mt-1">
-                            Kodi u dërgua tek <span class="font-medium text-gray-900"><?php 
-                                $tempEmail = $_SESSION['temp_user']['email'] ?? 'email...';
-                                echo substr($tempEmail, 0, 3) . '***' . substr($tempEmail, strpos($tempEmail, '@')); 
-                            ?></span>
+                            Der Code wurde in die Datei <span class="font-medium text-gray-900">admin/2fa.txt</span> geschrieben.
+                        </p>
+                        <p class="text-xs text-gray-400 mt-2">
+                            Öffnen Sie die Datei <code class="bg-gray-100 px-2 py-1 rounded">admin/2fa.txt</code>, um den Code zu sehen.
+                        </p>
+                        <p class="text-xs text-gray-400 mt-1">
+                            Der Code wurde auch an <span class="font-medium">elonberisha1999@gmail.com</span> gesendet.
                         </p>
                     </div>
 
@@ -345,21 +365,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         <button type="submit" 
                             class="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transform hover:-translate-y-0.5 transition-all duration-200">
-                            Verifiko <i class="fas fa-check-circle ml-2 mt-1"></i>
+                            Verifizieren <i class="fas fa-check-circle ml-2 mt-1"></i>
                         </button>
                     </form>
                     <form method="POST" action="" class="mt-4">
                         <input type="hidden" name="action" value="cancel">
                         <button class="w-full text-center text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors">
-                            <i class="fas fa-arrow-left mr-1"></i> Kthehu
+                            <i class="fas fa-arrow-left mr-1"></i> Zurück
                         </button>
                     </form>
 
                 <!-- VIEW: FORGOT PASSWORD - EMAIL -->
                 <?php elseif ($view === 'forgot_email'): ?>
                     <div class="text-center mb-6">
-                        <h3 class="text-lg font-bold text-gray-900">Rivendos Fjalëkalimin</h3>
-                        <p class="text-sm text-gray-500 mt-1">Shkruani emailin tuaj të regjistruar</p>
+                        <h3 class="text-lg font-bold text-gray-900">Passwort zurücksetzen</h3>
+                        <p class="text-sm text-gray-500 mt-1">Geben Sie Ihre registrierte E-Mail-Adresse ein</p>
                     </div>
                     <form method="POST" action="" class="space-y-6">
                         <input type="hidden" name="action" value="send_reset">
@@ -375,20 +395,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         <button type="submit" 
                             class="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transform hover:-translate-y-0.5 transition-all duration-200">
-                            Dërgo Kodin <i class="fas fa-paper-plane ml-2 mt-1"></i>
+                            Code senden <i class="fas fa-paper-plane ml-2 mt-1"></i>
                         </button>
                     </form>
                     <div class="mt-4 text-center">
                         <a href="login.php" class="text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors">
-                            <i class="fas fa-arrow-left mr-1"></i> Kthehu tek Login
+                            <i class="fas fa-arrow-left mr-1"></i> Zurück zum Login
                         </a>
                     </div>
 
                 <!-- VIEW: FORGOT PASSWORD - VERIFY -->
                 <?php elseif ($view === 'forgot_verify'): ?>
                     <div class="text-center mb-6">
-                        <h3 class="text-lg font-bold text-gray-900">Verifiko Kodin</h3>
-                        <p class="text-sm text-gray-500 mt-1">Kodi i dërguar tek <span class="font-medium"><?php echo htmlspecialchars($_SESSION['reset_user']['email'] ?? ''); ?></span></p>
+                        <h3 class="text-lg font-bold text-gray-900">Code verifizieren</h3>
+                        <p class="text-sm text-gray-500 mt-1">
+                            Der Code wurde in die Datei <span class="font-medium text-gray-900">admin/2fa.txt</span> geschrieben.
+                        </p>
+                        <p class="text-xs text-gray-400 mt-2">
+                            Öffnen Sie die Datei <code class="bg-gray-100 px-2 py-1 rounded">admin/2fa.txt</code>, um den Code zu sehen.
+                        </p>
+                        <p class="text-xs text-gray-400 mt-1">
+                            Der Code wurde auch an <span class="font-medium">elonberisha1999@gmail.com</span> gesendet.
+                        </p>
                     </div>
                     <form method="POST" action="" class="space-y-6">
                         <input type="hidden" name="action" value="verify_reset">
@@ -399,7 +427,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         <button type="submit" 
                             class="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transform hover:-translate-y-0.5 transition-all duration-200">
-                            Verifiko <i class="fas fa-check-circle ml-2 mt-1"></i>
+                            Verifizieren <i class="fas fa-check-circle ml-2 mt-1"></i>
                         </button>
                     </form>
                     <form method="POST" action="" class="mt-4">
@@ -413,26 +441,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <!-- VIEW: FORGOT PASSWORD - NEW PASSWORD -->
                 <?php elseif ($view === 'forgot_new_pass'): ?>
                     <div class="text-center mb-6">
-                        <h3 class="text-lg font-bold text-gray-900">Fjalëkalimi i Ri</h3>
-                        <p class="text-sm text-gray-500 mt-1">Për userin: <span class="font-medium"><?php echo htmlspecialchars($_SESSION['reset_user']['username'] ?? ''); ?></span></p>
+                        <h3 class="text-lg font-bold text-gray-900">Neues Passwort</h3>
+                        <p class="text-sm text-gray-500 mt-1">Für Benutzer: <span class="font-medium"><?php echo htmlspecialchars($_SESSION['reset_user']['username'] ?? ''); ?></span></p>
                     </div>
                     <form method="POST" action="" class="space-y-6">
                         <input type="hidden" name="action" value="save_pass">
                         <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-2">Fjalëkalimi i ri</label>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Neues Passwort</label>
                             <input type="password" name="password" required autofocus
                                 class="block w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
                                 placeholder="******">
                         </div>
                         <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-2">Konfirmo fjalëkalimin</label>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Passwort bestätigen</label>
                             <input type="password" name="confirm" required
                                 class="block w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
                                 placeholder="******">
                         </div>
                         <button type="submit" 
                             class="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transform hover:-translate-y-0.5 transition-all duration-200">
-                            Ruaj Fjalëkalimin <i class="fas fa-save ml-2 mt-1"></i>
+                            Passwort speichern <i class="fas fa-save ml-2 mt-1"></i>
                         </button>
                     </form>
                 <?php endif; ?>

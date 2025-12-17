@@ -5,6 +5,13 @@ requireLogin();
 $message = '';
 $messageType = '';
 
+if (isset($_SESSION['message'])) {
+    $message = $_SESSION['message'];
+    $messageType = $_SESSION['message_type'];
+    unset($_SESSION['message']);
+    unset($_SESSION['message_type']);
+}
+
 // Handle Form Submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = [
@@ -14,33 +21,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ];
 
     if (updateSectionData('legal_section', $data)) {
-        $message = 'Të dhënat ligjore u përditësuan me sukses!';
-        $messageType = 'success';
+        $_SESSION['message'] = 'Rechtsdaten wurden erfolgreich aktualisiert!';
+        $_SESSION['message_type'] = 'success';
     } else {
-        $message = 'Gabim gjatë përditësimit.';
-        $messageType = 'error';
+        $_SESSION['message'] = 'Fehler beim Aktualisieren.';
+        $_SESSION['message_type'] = 'error';
     }
+    
+    header("Location: legal.php");
+    exit;
 }
 
 // Get Data
 $legal = getSectionData('legal_section');
 ?>
 <!DOCTYPE html>
-<html lang="sq">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menaxho Legal - Admin Panel</title>
+    <title>Rechtliches verwalten - Admin Panel</title>
     <link rel="stylesheet" href="../dist/css/output.css">
     <link rel="stylesheet" href="../assets/fontawesome/all.min.css">
-    <!-- Optional: Add a rich text editor like TinyMCE or CKEditor here if needed -->
-    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <link rel="icon" type="image/x-icon" href="../favicon.ico" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Ab-Bau-Fliesen" />
+    <link rel="manifest" href="../site.webmanifest" />
+    <!-- Summernote Lite (Local Hosting) -->
+    <script src="assets/vendor/jquery/jquery.min.js"></script>
+    <link href="assets/vendor/summernote/summernote-lite.min.css" rel="stylesheet">
+    <script src="assets/vendor/summernote/summernote-lite.min.js"></script>
     <script>
-      tinymce.init({
-        selector: 'textarea.rich-editor',
-        plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
-        toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
-        height: 400
+      $(document).ready(function() {
+          $('.rich-editor').summernote({
+              placeholder: 'Text hier eingeben...',
+              tabsize: 2,
+              height: 400,
+              toolbar: [
+                  ['style', ['style']],
+                  ['font', ['bold', 'underline', 'clear']],
+                  ['color', ['color']],
+                  ['para', ['ul', 'ol', 'paragraph']],
+                  ['table', ['table']],
+                  ['insert', ['link', 'picture', 'video']],
+                  ['view', ['fullscreen', 'codeview', 'help']]
+              ]
+          });
       });
     </script>
 </head>
@@ -99,7 +127,7 @@ $legal = getSectionData('legal_section');
                     <!-- Save Button -->
                     <div class="flex justify-end pt-4 pb-8">
                         <button type="submit" class="bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-8 rounded-lg shadow-lg transform hover:-translate-y-0.5 transition-all flex items-center">
-                            <i class="fas fa-save mr-2"></i> Ruaj Të Gjitha Ndryshimet
+                            <i class="fas fa-save mr-2"></i> Alle Änderungen speichern
                         </button>
                     </div>
 

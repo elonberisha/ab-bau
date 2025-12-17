@@ -2,7 +2,8 @@
 
 ## Hyrje në Sistem
 
-**URL:** `http://localhost/ab-bau/admin/login.php`
+**URL (Local):** `http://localhost/ab-bau/admin/login.php`
+**URL (Production):** `https://ab-bau-fliesen.de/admin/login.php`
 
 **Fjalëkalimi Default:** `admin123`
 
@@ -43,20 +44,18 @@ admin/
 ├── services.php       # Menaxhimi i shërbimeve
 ├── reviews.php        # Menaxhimi i reviews
 ├── functions.php      # Funksione helper
+├── includes/
+│   └── db_connect.php # Lidhja me MySQL
 └── logout.php         # Logout
 
-data/
-├── config.json        # Konfigurimi (password hash)
-├── gallery.json       # Të dhënat e galerisë
-├── services.json      # Të dhënat e shërbimeve
-└── reviews.json       # Të dhënat e reviews
-
 api/
-├── get-data.php       # API për lexim të dhënash
+├── get-data.php       # API për lexim të dhënash nga MySQL
 └── submit-review.php  # API për dërgim reviews
 
 uploads/               # Folder për fotot e uploaduara
 ```
+
+**Shënim:** Të dhënat ruhen në MySQL, jo në skedarë JSON.
 
 ## Siguria
 
@@ -68,18 +67,21 @@ uploads/               # Folder për fotot e uploaduara
 
 ## Integrimi me Faqen Publike
 
-Faqja publike lexon të dhënat nga API:
+Faqja publike lexon të dhënat nga API (që merr të dhëna nga MySQL):
 - `api/get-data.php?type=gallery` - Për galerinë
 - `api/get-data.php?type=services` - Për shërbimet
 - `api/get-data.php?type=reviews` - Për reviews
+- `api/get-data.php?type=catalogs` - Për kataloget
+- `api/get-data.php?type=portfolio` - Për portofolin
+- `api/get-data.php?type=customization` - Për konfigurimin e faqes
 
 ## Ndryshimi i Fjalëkalimit
 
-Për të ndryshuar fjalëkalimin, përditëso `data/config.json` ose shto funksionalitet në dashboard.
+Për të ndryshuar fjalëkalimin, përdor funksionalitetin në dashboard ose direkt në databazë.
 
 ## Kujdes
 
-- Backup bëj `data/` folder para ndryshimeve të mëdha
-- Mos fshi skedarët JSON manualisht
+- Backup bëj databazën MySQL para ndryshimeve të mëdha
 - Kontrollo permissions për folderin `uploads/`
+- Të gjitha të dhënat ruhen në MySQL, jo në skedarë JSON
 

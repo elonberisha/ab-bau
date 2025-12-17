@@ -151,41 +151,29 @@ if (contactForm) {
         submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Wird gesendet...';
         submitButton.disabled = true;
         
-        // Simulate form submission (replace with actual API call)
-        setTimeout(() => {
-            console.log('Form submitted:', formData);
-            
-            // Show success message
-            showFormMessage('Vielen Dank! Ihre Nachricht wurde gesendet. Wir werden uns bald bei Ihnen melden.', 'success');
-            
-            // Reset form
-            contactForm.reset();
-            
-            // Reset button
-            submitButton.innerHTML = originalText;
-            submitButton.disabled = false;
-        }, 1500);
-        
-        // In a real application, you would send this data to your server:
-        /*
-        fetch('/api/contact', {
+        // Send form data to API
+        fetch('api/submit-contact.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData)
         })
         .then(response => response.json())
         .then(data => {
-            showFormMessage('Vielen Dank! Ihre Nachricht wurde gesendet.', 'success');
-            contactForm.reset();
+            if (data.success) {
+                showFormMessage(data.message || 'Vielen Dank! Ihre Nachricht wurde erfolgreich gesendet. Wir werden uns bald bei Ihnen melden.', 'success');
+                contactForm.reset();
+            } else {
+                showFormMessage(data.error || 'Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.', 'error');
+            }
             submitButton.innerHTML = originalText;
             submitButton.disabled = false;
         })
         .catch(error => {
-            showFormMessage('Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.', 'error');
+            console.error('Error:', error);
+            showFormMessage('Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut oder kontaktieren Sie uns direkt unter anduena@ab-bau-fliesen.de', 'error');
             submitButton.innerHTML = originalText;
             submitButton.disabled = false;
         });
-        */
     });
 }
 
@@ -572,27 +560,35 @@ if ('IntersectionObserver' in window) {
 
 // Cookie Banner
 function initCookieBanner() {
-    // Check if user has already accepted cookies
+    // Check if user has already accepted/rejected cookies
     const cookieConsent = localStorage.getItem('cookieConsent');
     
     if (!cookieConsent) {
         // Create cookie banner
         const cookieBanner = document.createElement('div');
         cookieBanner.id = 'cookieBanner';
-        cookieBanner.className = 'fixed bottom-0 left-0 right-0 bg-gray-900 text-white p-4 sm:p-6 z-50 shadow-2xl border-t border-gray-800';
+        cookieBanner.className = 'fixed bottom-0 left-0 right-0 bg-gray-900 text-white p-4 sm:p-6 z-50 shadow-2xl border-t border-gray-800 transform translate-y-full transition-transform duration-500 ease-out';
         cookieBanner.innerHTML = `
             <div class="container mx-auto max-w-7xl">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                     <div class="flex-1">
-                        <h3 class="text-lg font-bold mb-2">Cookies & Datenschutz</h3>
-                        <p class="text-sm text-gray-300">
-                            Diese Website verwendet keine Cookies, die personenbezogene Daten sammeln. Wir respektieren Ihre Privatsphäre und verwenden keine Tracking-Technologien. 
-                            <a href="datenschutz.html" class="text-primary hover:underline">Mehr erfahren</a>
+                        <h3 class="text-lg font-bold mb-2">Wir respektieren Ihre Privatsphäre</h3>
+                        <p class="text-sm text-gray-300 mb-2">
+                            Wir verwenden Cookies und ähnliche Technologien, um das Nutzererlebnis auf unserer Website zu verbessern. 
+                            Einige sind technisch notwendig, andere helfen uns, Inhalte zu personalisieren und Zugriffe zu analysieren.
+                        </p>
+                        <p class="text-sm">
+                            <a href="datenschutz.php" class="text-primary hover:underline underline-offset-2">Datenschutzerklärung</a>
+                            <span class="mx-2 text-gray-500">|</span>
+                            <a href="impressum.php" class="text-gray-400 hover:text-white underline-offset-2">Impressum</a>
                         </p>
                     </div>
-                    <div class="flex gap-3">
-                        <button id="acceptCookies" class="bg-primary hover:bg-primary-dark text-white px-6 py-2 rounded-lg font-medium transition-colors">
-                            Verstanden
+                    <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                        <button id="rejectCookies" class="px-6 py-2.5 rounded-lg font-medium border border-gray-600 hover:bg-gray-800 hover:border-gray-500 transition-all text-sm sm:text-base whitespace-nowrap">
+                            Nur notwendige
+                        </button>
+                        <button id="acceptCookies" class="bg-primary hover:bg-primary-dark text-white px-6 py-2.5 rounded-lg font-medium shadow-lg hover:shadow-primary/25 transition-all text-sm sm:text-base whitespace-nowrap">
+                            Alle akzeptieren
                         </button>
                     </div>
                 </div>
@@ -601,14 +597,30 @@ function initCookieBanner() {
         
         document.body.appendChild(cookieBanner);
         
-        // Add event listener to accept button
-        document.getElementById('acceptCookies').addEventListener('click', () => {
-            localStorage.setItem('cookieConsent', 'accepted');
-            cookieBanner.style.transform = 'translateY(100%)';
-            cookieBanner.style.transition = 'transform 0.3s ease-out';
+        // Slide in animation
+        setTimeout(() => {
+            cookieBanner.classList.remove('translate-y-full');
+        }, 100);
+        
+        const closeBanner = () => {
+            cookieBanner.classList.add('translate-y-full');
             setTimeout(() => {
                 cookieBanner.remove();
-            }, 300);
+            }, 500);
+        };
+
+        // Accept All
+        document.getElementById('acceptCookies').addEventListener('click', () => {
+            localStorage.setItem('cookieConsent', 'accepted');
+            // Here you would enable tracking scripts if you had any
+            closeBanner();
+        });
+
+        // Reject (Only Necessary)
+        document.getElementById('rejectCookies').addEventListener('click', () => {
+            localStorage.setItem('cookieConsent', 'rejected');
+            // Here you would ensure tracking scripts remain disabled
+            closeBanner();
         });
     }
 }

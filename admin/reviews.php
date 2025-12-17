@@ -2,57 +2,54 @@
 require_once 'functions.php';
 requireLogin();
 
-$reviews = readJson('reviews.json');
 $message = '';
 $messageType = '';
-$pageTitle = 'Menaxho Reviews';
+$pageTitle = 'Bewertungen verwalten';
+
+if (isset($_SESSION['message'])) {
+    $message = $_SESSION['message'];
+    $messageType = $_SESSION['message_type'];
+    unset($_SESSION['message']);
+    unset($_SESSION['message_type']);
+}
 
 // Handle actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
+    $id = (int)($_POST['id'] ?? 0);
     
     if ($action === 'approve') {
-        $id = $_POST['id'] ?? '';
-        foreach ($reviews['pending'] as $key => $review) {
-            if ($review['id'] === $id) {
-                $reviews['approved'][] = $review;
-                unset($reviews['pending'][$key]);
-                $reviews['pending'] = array_values($reviews['pending']);
-                writeJson('reviews.json', $reviews);
-                $message = 'Review wurde erfolgreich genehmigt! Änderungen werden in index.html übernommen.';
-                $messageType = 'success';
-                break;
-            }
+        $stmt = $pdo->prepare("UPDATE reviews SET status = 'approved' WHERE id = :id");
+        if ($stmt->execute(['id' => $id])) {
+            $_SESSION['message'] = 'Bewertung erfolgreich genehmigt!';
+            $_SESSION['message_type'] = 'success';
         }
-        $reviews = readJson('reviews.json');
     } elseif ($action === 'reject') {
-        $id = $_POST['id'] ?? '';
-        foreach ($reviews['pending'] as $key => $review) {
-            if ($review['id'] === $id) {
-                unset($reviews['pending'][$key]);
-                $reviews['pending'] = array_values($reviews['pending']);
-                writeJson('reviews.json', $reviews);
-                $message = 'Review wurde abgelehnt!';
-                $messageType = 'success';
-                break;
-            }
+        // Rejecting usually means deleting or setting status to rejected. Let's delete for now or soft delete.
+        // Based on previous logic, "reject" was removing from pending. So delete is fine or status='rejected'.
+        // Let's delete to keep it clean, or use 'rejected' if we want history. 
+        // User asked to "fix", standard is usually Approve vs Delete.
+        $stmt = $pdo->prepare("DELETE FROM reviews WHERE id = :id");
+        if ($stmt->execute(['id' => $id])) {
+            $_SESSION['message'] = 'Bewertung abgelehnt (gelöscht)!';
+            $_SESSION['message_type'] = 'success'; // or error style for delete
         }
-        $reviews = readJson('reviews.json');
     } elseif ($action === 'delete_approved') {
-        $id = $_POST['id'] ?? '';
-        foreach ($reviews['approved'] as $key => $review) {
-            if ($review['id'] === $id) {
-                unset($reviews['approved'][$key]);
-                $reviews['approved'] = array_values($reviews['approved']);
-                writeJson('reviews.json', $reviews);
-                $message = 'Review wurde erfolgreich gelöscht! Änderungen werden in index.html übernommen.';
-                $messageType = 'success';
-                break;
-            }
+        $stmt = $pdo->prepare("DELETE FROM reviews WHERE id = :id");
+        if ($stmt->execute(['id' => $id])) {
+            $_SESSION['message'] = 'Bewertung erfolgreich gelöscht!';
+            $_SESSION['message_type'] = 'success';
         }
-        $reviews = readJson('reviews.json');
     }
+    
+    header("Location: reviews.php");
+    exit;
 }
+
+// Fetch Reviews
+$pendingReviews = $pdo->query("SELECT * FROM reviews WHERE status = 'pending' ORDER BY date DESC")->fetchAll();
+$approvedReviews = $pdo->query("SELECT * FROM reviews WHERE status = 'approved' ORDER BY date DESC")->fetchAll();
+
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -62,126 +59,129 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title><?php echo $pageTitle; ?> - Admin Panel</title>
     <link rel="stylesheet" href="../dist/css/output.css">
     <link rel="stylesheet" href="../assets/fontawesome/all.min.css">
+    <link rel="icon" type="image/x-icon" href="../favicon.ico" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Ab-Bau-Fliesen" />
+    <link rel="manifest" href="../site.webmanifest" />
 </head>
 <body class="bg-gray-100">
-    <?php include 'includes/sidebar.php'; ?>
-    <?php include 'includes/header.php'; ?>
-
-    <div class="ml-64 pt-16 p-6">
-        <?php if ($message): ?>
-            <div class="bg-<?php echo $messageType === 'success' ? 'green' : 'red'; ?>-100 border border-<?php echo $messageType === 'success' ? 'green' : 'red'; ?>-400 text-<?php echo $messageType === 'success' ? 'green' : 'red'; ?>-700 px-4 py-3 rounded mb-4 flex items-center justify-between">
-                <span>
-                    <i class="fas fa-<?php echo $messageType === 'success' ? 'check-circle' : 'exclamation-circle'; ?> mr-2"></i>
-                    <?php echo htmlspecialchars($message); ?>
-                </span>
-                <a href="../index.html" target="_blank" class="text-<?php echo $messageType === 'success' ? 'green' : 'red'; ?>-700 hover:underline font-semibold">
-                    <i class="fas fa-external-link-alt mr-1"></i>Shiko Faqen
-                </a>
-            </div>
-        <?php endif; ?>
-
-        <!-- Pending Reviews -->
-        <div class="bg-white rounded-lg shadow p-6 mb-8">
-            <h2 class="text-xl font-bold mb-4 flex items-center">
-                <i class="fas fa-clock text-orange-500 mr-2"></i>
-                Reviews në Pritje (<?php echo count($reviews['pending'] ?? []); ?>)
-            </h2>
-            <?php if (empty($reviews['pending'])): ?>
-                <p class="text-gray-500 text-center py-8">Nuk ka reviews në pritje.</p>
-            <?php else: ?>
-                <div class="space-y-4">
-                    <?php foreach ($reviews['pending'] ?? [] as $review): ?>
-                        <div class="border rounded-lg p-4 bg-orange-50">
-                            <div class="flex justify-between items-start mb-3">
-                                <div>
-                                    <h3 class="font-bold text-lg"><?php echo htmlspecialchars($review['name'] ?? 'Anonim'); ?></h3>
-                                    <div class="flex items-center mt-1">
-                                        <?php for ($i = 1; $i <= 5; $i++): ?>
-                                            <i class="fas fa-star <?php echo $i <= ($review['rating'] ?? 0) ? 'text-yellow-400' : 'text-gray-300'; ?>"></i>
-                                        <?php endfor; ?>
-                                        <span class="ml-2 text-sm text-gray-600"><?php echo $review['rating'] ?? 0; ?>/5</span>
-                                    </div>
-                                </div>
-                                <span class="text-sm text-gray-500"><?php echo htmlspecialchars($review['date'] ?? ''); ?></span>
-                            </div>
-                            <p class="text-gray-700 mb-4"><?php echo nl2br(htmlspecialchars($review['message'] ?? '')); ?></p>
-                            <div class="flex space-x-2">
-                                <form method="POST" class="inline">
-                                    <input type="hidden" name="action" value="approve">
-                                    <input type="hidden" name="id" value="<?php echo $review['id']; ?>">
-                                    <button type="submit" class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 font-semibold shadow-lg hover:shadow-xl transition-all">
-                                        <i class="fas fa-save mr-2"></i>Speichern & Genehmigen
-                                    </button>
-                                </form>
-                                <form method="POST" class="inline" onsubmit="return confirm('A jeni të sigurt që dëshironi ta refuzoni?');">
-                                    <input type="hidden" name="action" value="reject">
-                                    <input type="hidden" name="id" value="<?php echo $review['id']; ?>">
-                                    <button type="submit" class="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 font-semibold shadow-lg hover:shadow-xl transition-all">
-                                        <i class="fas fa-times mr-2"></i>Refuzo
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
-        </div>
-
-        <!-- Approved Reviews -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-xl font-bold mb-4 flex items-center">
-                <i class="fas fa-check-circle text-green-500 mr-2"></i>
-                Reviews të Aprovuara (<?php echo count($reviews['approved'] ?? []); ?>)
-            </h2>
-            <?php if (empty($reviews['approved'])): ?>
-                <p class="text-gray-500 text-center py-8">Nuk ka reviews të aprovuara.</p>
-            <?php else: ?>
-                <div class="space-y-4">
-                    <?php foreach ($reviews['approved'] ?? [] as $review): ?>
-                        <div class="border rounded-lg p-4 bg-green-50">
-                            <div class="flex justify-between items-start mb-3">
-                                <div>
-                                    <h3 class="font-bold text-lg"><?php echo htmlspecialchars($review['name'] ?? 'Anonim'); ?></h3>
-                                    <div class="flex items-center mt-1">
-                                        <?php for ($i = 1; $i <= 5; $i++): ?>
-                                            <i class="fas fa-star <?php echo $i <= ($review['rating'] ?? 0) ? 'text-yellow-400' : 'text-gray-300'; ?>"></i>
-                                        <?php endfor; ?>
-                                        <span class="ml-2 text-sm text-gray-600"><?php echo $review['rating'] ?? 0; ?>/5</span>
-                                    </div>
-                                </div>
-                                <div class="flex items-center space-x-2">
-                                    <span class="text-sm text-gray-500"><?php echo htmlspecialchars($review['date'] ?? ''); ?></span>
-                                    <form method="POST" class="inline" onsubmit="return confirm('A jeni të sigurt?');">
-                                        <input type="hidden" name="action" value="delete_approved">
-                                        <input type="hidden" name="id" value="<?php echo $review['id']; ?>">
-                                        <button type="submit" class="bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                            <p class="text-gray-700"><?php echo nl2br(htmlspecialchars($review['message'] ?? '')); ?></p>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="w-64 flex-shrink-0 bg-white border-r border-gray-200">
+            <?php include 'includes/sidebar.php'; ?>
         </div>
         
-        <!-- Info Box -->
-        <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-            <div class="flex items-start">
-                <i class="fas fa-info-circle text-blue-500 text-2xl mr-4 mt-1"></i>
-                <div>
-                    <h3 class="text-lg font-bold text-blue-900 mb-2">Informacion</h3>
-                    <p class="text-blue-800 mb-3">
-                        Reviews, die hier genehmigt werden, werden automatisch in <strong>index.html</strong> über die API übernommen. 
-                        Vetëm reviews të aprovuara shfaqen në faqen publike.
-                    </p>
-                    <a href="../index.html" target="_blank" class="inline-flex items-center bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-                        <i class="fas fa-external-link-alt mr-2"></i>Shiko Faqen Publike
-                    </a>
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            <!-- Header -->
+            <header class="bg-white shadow-sm z-10 h-16 flex items-center justify-between px-6 border-b border-gray-200">
+                <h1 class="text-xl font-bold text-gray-800">
+                    <i class="fas fa-star mr-2 text-yellow-500"></i>Bewertungen verwalten
+                </h1>
+            </header>
+            
+            <!-- Scrollable Content -->
+            <main class="flex-1 overflow-y-auto bg-gray-50 p-6 md:p-8">
+                
+                <?php if ($message): ?>
+                    <div class="mb-6 p-4 rounded-lg <?php echo $messageType === 'success' ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'; ?> flex items-center shadow-sm">
+                        <i class="fas <?php echo $messageType === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'; ?> mr-3 text-xl"></i>
+                        <span class="font-medium"><?php echo $message; ?></span>
+                    </div>
+                <?php endif; ?>
+
+                <!-- Pending Reviews -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+                    <h2 class="text-xl font-bold mb-4 flex items-center text-orange-600">
+                        <i class="fas fa-clock mr-2"></i>
+                        Bewertungen ausstehend (<?php echo count($pendingReviews); ?>)
+                    </h2>
+                    <?php if (empty($pendingReviews)): ?>
+                        <div class="text-center py-8 bg-orange-50 rounded-lg border border-orange-100 text-orange-500">
+                            Keine neuen Bewertungen ausstehend.
+                        </div>
+                    <?php else: ?>
+                        <div class="space-y-4">
+                            <?php foreach ($pendingReviews as $review): ?>
+                                <div class="border rounded-xl p-5 bg-white shadow-sm hover:shadow-md transition-shadow border-l-4 border-l-orange-400">
+                                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3">
+                                        <div>
+                                            <h3 class="font-bold text-lg text-gray-900"><?php echo htmlspecialchars($review['name']); ?></h3>
+                                            <div class="flex items-center mt-1 space-x-2">
+                                                <div class="flex text-yellow-400 text-sm">
+                                                    <?php for ($i = 1; $i <= 5; $i++): ?>
+                                                        <i class="fas fa-star <?php echo $i <= $review['rating'] ? '' : 'text-gray-300'; ?>"></i>
+                                                    <?php endfor; ?>
+                                                </div>
+                                                <span class="text-sm text-gray-500">• <?php echo date('d.m.Y', strtotime($review['date'])); ?></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-700 mb-4 bg-gray-50 p-3 rounded-lg text-sm"><?php echo nl2br(htmlspecialchars($review['message'])); ?></p>
+                                    <div class="flex space-x-3 pt-2 border-t border-gray-100">
+                                        <form method="POST" class="inline">
+                                            <input type="hidden" name="action" value="approve">
+                                            <input type="hidden" name="id" value="<?php echo $review['id']; ?>">
+                                            <button type="submit" class="bg-green-100 text-green-700 px-4 py-2 rounded-lg hover:bg-green-200 font-medium transition-colors flex items-center text-sm">
+                                                <i class="fas fa-check mr-2"></i>Genehmigen
+                                            </button>
+                                        </form>
+                                        <form method="POST" class="inline" onsubmit="return confirm('Sind Sie sicher, dass Sie diese Bewertung ablehnen möchten?');">
+                                            <input type="hidden" name="action" value="reject">
+                                            <input type="hidden" name="id" value="<?php echo $review['id']; ?>">
+                                            <button type="submit" class="bg-red-100 text-red-700 px-4 py-2 rounded-lg hover:bg-red-200 font-medium transition-colors flex items-center text-sm">
+                                                <i class="fas fa-times mr-2"></i>Ablehnen
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
-            </div>
+
+                <!-- Approved Reviews -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <h2 class="text-xl font-bold mb-4 flex items-center text-green-600">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        Genehmigte Bewertungen (<?php echo count($approvedReviews); ?>)
+                    </h2>
+                    <?php if (empty($approvedReviews)): ?>
+                        <div class="text-center py-8 bg-gray-50 rounded-lg text-gray-500">
+                            Noch keine Bewertungen genehmigt.
+                        </div>
+                    <?php else: ?>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <?php foreach ($approvedReviews as $review): ?>
+                                <div class="border rounded-xl p-5 bg-white relative group hover:border-green-200 transition-colors">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <h3 class="font-bold text-gray-900"><?php echo htmlspecialchars($review['name']); ?></h3>
+                                        <div class="flex text-yellow-400 text-xs">
+                                            <?php for ($i = 1; $i <= 5; $i++): ?>
+                                                <i class="fas fa-star <?php echo $i <= $review['rating'] ? '' : 'text-gray-300'; ?>"></i>
+                                            <?php endfor; ?>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-600 text-sm mb-3 line-clamp-3"><?php echo htmlspecialchars($review['message']); ?></p>
+                                    <div class="flex justify-between items-center text-xs text-gray-400 mt-auto pt-3 border-t border-gray-50">
+                                        <span><?php echo date('d.m.Y', strtotime($review['date'])); ?></span>
+                                        <form method="POST" class="inline" onsubmit="return confirm('Sind Sie sicher?');">
+                                            <input type="hidden" name="action" value="delete_approved">
+                                            <input type="hidden" name="id" value="<?php echo $review['id']; ?>">
+                                            <button type="submit" class="text-red-400 hover:text-red-600 p-1 rounded transition-colors" title="Löschen">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+                
+            </main>
         </div>
     </div>
 </body>

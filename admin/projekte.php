@@ -5,6 +5,13 @@ requireLogin();
 $message = '';
 $messageType = '';
 
+if (isset($_SESSION['message'])) {
+    $message = $_SESSION['message'];
+    $messageType = $_SESSION['message_type'];
+    unset($_SESSION['message']);
+    unset($_SESSION['message_type']);
+}
+
 // Handle CRUD
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
@@ -21,38 +28,91 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($_POST['action'] === 'create') {
                 $stmt = $pdo->prepare("INSERT INTO projects (title, description, image, type, date, active) VALUES (:title, :desc, :img, :type, :date, :active)");
                 if ($stmt->execute(['title' => $title, 'desc' => $description, 'img' => $image, 'type' => $type, 'date' => $date, 'active' => $active])) {
-                    $message = 'Projekti u shtua!';
-                    $messageType = 'success';
+                    $_SESSION['message'] = 'Projekt wurde hinzugefügt!';
+                    $_SESSION['message_type'] = 'success';
+                } else {
+                    $_SESSION['message'] = 'Fehler beim Hinzufügen.';
+                    $_SESSION['message_type'] = 'error';
                 }
             } else {
                 $id = (int)$_POST['id'];
                 $stmt = $pdo->prepare("UPDATE projects SET title = :title, description = :desc, image = :img, type = :type, date = :date, active = :active WHERE id = :id");
                 if ($stmt->execute(['title' => $title, 'desc' => $description, 'img' => $image, 'type' => $type, 'date' => $date, 'active' => $active, 'id' => $id])) {
-                    $message = 'Projekti u përditësua!';
-                    $messageType = 'success';
+                    $_SESSION['message'] = 'Projekt wurde aktualisiert!';
+                    $_SESSION['message_type'] = 'success';
+                } else {
+                    $_SESSION['message'] = 'Fehler beim Aktualisieren.';
+                    $_SESSION['message_type'] = 'error';
                 }
             }
         } elseif ($_POST['action'] === 'delete') {
             $id = (int)$_POST['id'];
             $stmt = $pdo->prepare("DELETE FROM projects WHERE id = :id");
             if ($stmt->execute(['id' => $id])) {
-                $message = 'Projekti u fshi!';
-                $messageType = 'success';
+                $_SESSION['message'] = 'Projekt wurde gelöscht!';
+                $_SESSION['message_type'] = 'success';
+            } else {
+                $_SESSION['message'] = 'Fehler beim Löschen.';
+                $_SESSION['message_type'] = 'error';
             }
         }
+        
+        header("Location: projekte.php");
+        exit;
     }
 }
 
 $projects = $pdo->query("SELECT * FROM projects ORDER BY date DESC")->fetchAll();
+
+// Get portfolio section data
+$sectionData = getSectionData('portfolio_section');
+
+$pageSettingsOpen = false;
+if (isset($_SESSION['open_section'])) {
+    if ($_SESSION['open_section'] === 'pageSettings') {
+        $pageSettingsOpen = true;
+    }
+    unset($_SESSION['open_section']);
+}
+
+// Handle section update
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_section') {
+    $data = [
+        'hero_image' => sanitize($_POST['hero_image'] ?? ''),
+        'show_in_index' => isset($_POST['show_in_index']) ? 1 : 0,
+        'max_items_index' => (int)($_POST['max_items_index'] ?? 6),
+        'index_title' => sanitize($_POST['index_title'] ?? ''),
+        'index_description' => sanitize($_POST['index_description'] ?? ''),
+        'full_title' => sanitize($_POST['full_title'] ?? ''),
+        'full_description' => sanitize($_POST['full_description'] ?? '')
+    ];
+
+    if (updateSectionData('portfolio_section', $data)) {
+        $_SESSION['message'] = 'Seiteneinstellungen wurden erfolgreich aktualisiert!';
+        $_SESSION['message_type'] = 'success';
+        $_SESSION['open_section'] = 'pageSettings';
+        header("Location: projekte.php");
+        exit;
+    } else {
+        $_SESSION['message'] = 'Fehler beim Aktualisieren der Einstellungen.';
+        $_SESSION['message_type'] = 'error';
+    }
+}
 ?>
 <!DOCTYPE html>
-<html lang="sq">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menaxho Portfolion - Admin Panel</title>
+    <title>Portfolio verwalten - Admin Panel</title>
     <link rel="stylesheet" href="../dist/css/output.css">
     <link rel="stylesheet" href="../assets/fontawesome/all.min.css">
+    <link rel="icon" type="image/x-icon" href="../favicon.ico" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Ab-Bau-Fliesen" />
+    <link rel="manifest" href="../site.webmanifest" />
     <script>
         function openModal(mode, data = null) {
             const modal = document.getElementById('projectModal');
@@ -63,8 +123,8 @@ $projects = $pdo->query("SELECT * FROM projects ORDER BY date DESC")->fetchAll()
             modal.classList.remove('hidden');
             
             if (mode === 'edit' && data) {
-                title.textContent = 'Ndrysho Projektin';
-                btn.textContent = 'Ruaj Ndryshimet';
+                title.textContent = 'Projekt bearbeiten';
+                btn.textContent = 'Änderungen speichern';
                 form.elements['action'].value = 'update';
                 form.elements['id'].value = data.id;
                 form.elements['title'].value = data.title;
@@ -76,8 +136,8 @@ $projects = $pdo->query("SELECT * FROM projects ORDER BY date DESC")->fetchAll()
                 
                 document.getElementById('image_preview').src = data.image ? '../' + data.image : 'assets/img/placeholder.png';
             } else {
-                title.textContent = 'Shto Projekt të Ri';
-                btn.textContent = 'Krijo Projekt';
+                title.textContent = 'Neues Projekt hinzufügen';
+                btn.textContent = 'Projekt erstellen';
                 form.reset();
                 form.elements['action'].value = 'create';
                 form.elements['id'].value = '';
@@ -88,6 +148,20 @@ $projects = $pdo->query("SELECT * FROM projects ORDER BY date DESC")->fetchAll()
 
         function closeModal() {
             document.getElementById('projectModal').classList.add('hidden');
+        }
+
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const icon = document.getElementById('icon-' + sectionId);
+            if (section.classList.contains('hidden')) {
+                section.classList.remove('hidden');
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+            } else {
+                section.classList.add('hidden');
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+            }
         }
     </script>
 </head>
@@ -107,11 +181,11 @@ $projects = $pdo->query("SELECT * FROM projects ORDER BY date DESC")->fetchAll()
                         <span class="bg-indigo-100 p-2 rounded-lg mr-3">
                             <i class="fas fa-briefcase text-indigo-600"></i>
                         </span>
-                        Portfolio (Projekte)
+                        Portfolio
                     </h1>
                 </div>
                 <button onclick="openModal('create')" class="bg-primary hover:bg-primary-dark text-white font-bold py-2 px-4 rounded-lg shadow-lg transform hover:-translate-y-0.5 transition-all text-sm">
-                    <i class="fas fa-plus mr-2"></i> Shto Projekt
+                    <i class="fas fa-plus mr-2"></i> Projekt hinzufügen
                 </button>
             </header>
             
@@ -127,14 +201,83 @@ $projects = $pdo->query("SELECT * FROM projects ORDER BY date DESC")->fetchAll()
                     </div>
                 <?php endif; ?>
 
+                <!-- PAGE CUSTOMIZATION SECTION -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
+                    <div class="bg-indigo-50/50 p-4 border-b border-indigo-100 flex justify-between items-center cursor-pointer" onclick="toggleSection('pageSettings')">
+                        <h2 class="text-lg font-bold text-indigo-900 flex items-center">
+                            <i class="fas fa-cog mr-2"></i> Seiteneinstellungen (Titel & Texte)
+                        </h2>
+                        <i id="icon-pageSettings" class="fas <?php echo $pageSettingsOpen ? 'fa-chevron-up' : 'fa-chevron-down'; ?> text-indigo-400"></i>
+                    </div>
+                    
+                    <div id="pageSettings" class="<?php echo $pageSettingsOpen ? '' : 'hidden'; ?> border-t border-gray-100">
+                        <form method="POST" class="p-6">
+                            <input type="hidden" name="action" value="update_section">
+                            
+                            <div class="space-y-8">
+                                <!-- Index Section -->
+                                <div>
+                                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 border-b pb-2">Bereich auf der Startseite (Index)</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div class="flex items-center mb-4 col-span-2">
+                                            <input type="checkbox" name="show_in_index" id="show_in_index" <?php echo ($sectionData['show_in_index'] ?? 1) ? 'checked' : ''; ?> class="form-checkbox h-5 w-5 text-indigo-600 rounded">
+                                            <label for="show_in_index" class="ml-2 text-gray-700 font-medium">Auf der Startseite anzeigen</label>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Titel auf der Startseite (blog-title)</label>
+                                            <input type="text" name="index_title" value="<?php echo htmlspecialchars($sectionData['index_title'] ?? 'Unser Baujournal'); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Anzahl der Projekte auf der Startseite</label>
+                                            <input type="number" name="max_items_index" value="<?php echo htmlspecialchars($sectionData['max_items_index'] ?? 6); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                        </div>
+                                        <div class="col-span-2">
+                                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Beschreibung auf der Startseite (blog-description)</label>
+                                            <textarea name="index_description" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg"><?php echo htmlspecialchars($sectionData['index_description'] ?? 'Aktuelle Projekte und Inspirationen.'); ?></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Portfolio Page Hero -->
+                                <div>
+                                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 border-b pb-2">Vollständige Seite (Portfolio.html)</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Haupttitel (portfolio-hero-title)</label>
+                                            <input type="text" name="full_title" value="<?php echo htmlspecialchars($sectionData['full_title'] ?? 'Unsere Projekte'); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Hero-Bild</label>
+                                            <div class="flex gap-2">
+                                                <input type="text" id="hero_image" name="hero_image" value="<?php echo htmlspecialchars($sectionData['hero_image'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg" readonly>
+                                                <button type="button" onclick="openMediaPicker('hero_image')" class="bg-gray-100 px-3 py-2 rounded border border-gray-300 hover:bg-gray-200"><i class="fas fa-image"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="col-span-2">
+                                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Beschreibung (portfolio-hero-description)</label>
+                                            <textarea name="full_description" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg"><?php echo htmlspecialchars($sectionData['full_description'] ?? 'Eine Auswahl unserer erfolgreich abgeschlossenen Projekte'); ?></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-8 flex justify-end">
+                                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transform hover:-translate-y-0.5 transition-all">
+                                    <i class="fas fa-save mr-2"></i> Einstellungen speichern
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
                 <!-- Projects Grid -->
                 <?php if (empty($projects)): ?>
                     <div class="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-200">
                         <div class="text-gray-400 mb-4">
                             <i class="fas fa-folder-open text-6xl"></i>
                         </div>
-                        <h3 class="text-lg font-medium text-gray-900">Nuk ka projekte</h3>
-                        <p class="text-gray-500 mt-1">Shtoni projektet tuaja të realizuara.</p>
+                        <h3 class="text-lg font-medium text-gray-900">Keine Projekte</h3>
+                        <p class="text-gray-500 mt-1">Fügen Sie Ihre realisierten Projekte hinzu.</p>
                     </div>
                 <?php else: ?>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -152,7 +295,7 @@ $projects = $pdo->query("SELECT * FROM projects ORDER BY date DESC")->fetchAll()
 
                                     <?php if (!$proj['active']): ?>
                                         <div class="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center">
-                                            <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm font-bold border border-gray-300">Jo Aktiv</span>
+                                            <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm font-bold border border-gray-300">Inaktiv</span>
                                         </div>
                                     <?php endif; ?>
                                 </div>
@@ -169,7 +312,7 @@ $projects = $pdo->query("SELECT * FROM projects ORDER BY date DESC")->fetchAll()
                                         <button onclick='openModal("edit", <?php echo json_encode($proj); ?>)' class="bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors">
                                             <i class="fas fa-edit mr-1"></i>
                                         </button>
-                                        <form method="POST" onsubmit="return confirm('Fshi projektin?');" class="inline">
+                                        <form method="POST" onsubmit="return confirm('Projekt löschen?');" class="inline">
                                             <input type="hidden" name="action" value="delete">
                                             <input type="hidden" name="id" value="<?php echo $proj['id']; ?>">
                                             <button type="submit" class="bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors">
@@ -190,7 +333,7 @@ $projects = $pdo->query("SELECT * FROM projects ORDER BY date DESC")->fetchAll()
     <div id="projectModal" class="fixed inset-0 bg-black/50 z-50 hidden backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center p-6 border-b border-gray-100">
-                <h3 class="text-xl font-bold text-gray-900" id="modalTitle">Shto Projekt</h3>
+                <h3 class="text-xl font-bold text-gray-900" id="modalTitle">Projekt hinzufügen</h3>
                 <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 rounded-lg p-1 hover:bg-gray-100 transition-colors">
                     <i class="fas fa-times text-xl"></i>
                 </button>
@@ -202,36 +345,36 @@ $projects = $pdo->query("SELECT * FROM projects ORDER BY date DESC")->fetchAll()
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Titulli i Projektit</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Projekttitel</label>
                         <input type="text" name="title" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors">
                     </div>
                     
                     <div class="col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Përshkrimi</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Beschreibung</label>
                         <textarea name="description" rows="3" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"></textarea>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Kategoria</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Kategorie</label>
                         <select name="type" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white">
-                            <option value="residential">Rezidenciale</option>
-                            <option value="commercial">Komerciale</option>
-                            <option value="renovation">Renovim</option>
-                            <option value="other">Tjetër</option>
+                            <option value="residential">Wohngebäude</option>
+                            <option value="commercial">Gewerbe</option>
+                            <option value="renovation">Renovierung</option>
+                            <option value="other">Sonstiges</option>
                         </select>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Data e Përfundimit</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fertigstellungsdatum</label>
                         <input type="date" name="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary">
                     </div>
 
                     <div class="col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Foto e Projektit</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Projektbild</label>
                         <div class="relative group cursor-pointer border-2 border-dashed border-gray-300 rounded-lg hover:border-primary transition-colors bg-gray-50 p-1" onclick="openMediaPicker('modal_image')">
                             <img src="assets/img/placeholder.png" id="image_preview" class="w-full h-48 object-cover rounded">
                             <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/10">
-                                <span class="bg-white text-gray-800 text-xs font-bold px-2 py-1 rounded shadow">Zgjidh</span>
+                                <span class="bg-white text-gray-800 text-xs font-bold px-2 py-1 rounded shadow">Auswählen</span>
                             </div>
                         </div>
                         <input type="hidden" id="modal_image" name="image">
@@ -240,17 +383,17 @@ $projects = $pdo->query("SELECT * FROM projects ORDER BY date DESC")->fetchAll()
                     <div class="col-span-2 pt-2">
                         <label class="flex items-center cursor-pointer">
                             <input type="checkbox" name="active" class="form-checkbox h-5 w-5 text-primary rounded border-gray-300 focus:ring-primary">
-                            <span class="ml-2 text-gray-700 font-medium">Projekt Aktiv</span>
+                            <span class="ml-2 text-gray-700 font-medium">Projekt aktiv</span>
                         </label>
                     </div>
                 </div>
 
                 <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
                     <button type="button" onclick="closeModal()" class="px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors">
-                        Anulo
+                        Abbrechen
                     </button>
                     <button type="submit" id="modalBtn" class="bg-primary hover:bg-primary-dark text-white font-bold py-2.5 px-6 rounded-lg shadow-lg transform hover:-translate-y-0.5 transition-all">
-                        Krijo Projekt
+                        Projekt erstellen
                     </button>
                 </div>
             </form>

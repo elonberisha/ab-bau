@@ -118,7 +118,31 @@ try {
                 ];
             }
 
-            // 3. CONTACT SECTION
+            // 3. SERVICES SECTION
+            $servicesSec = $pdo->query("SELECT * FROM services_section LIMIT 1")->fetch();
+            if ($servicesSec) {
+                $response['services'] = [
+                    'hero_image' => $servicesSec['hero_image'],
+                    'show_in_index' => (bool)$servicesSec['show_in_index'],
+                    'max_cards_index' => (int)$servicesSec['max_cards_index'],
+                    'section_subtitle' => $servicesSec['section_subtitle'],
+                    'section_title_line1' => $servicesSec['section_title_line1'],
+                    'section_title_line2' => $servicesSec['section_title_line2'],
+                    'section_description' => $servicesSec['section_description'],
+                    'full_title' => $servicesSec['full_title'],
+                    'full_description' => $servicesSec['full_description'],
+                    'additional_title' => $servicesSec['additional_title'],
+                    'additional_cards' => json_decode($servicesSec['additional_cards_json'] ?? '[]', true),
+                    'why_title' => $servicesSec['why_title'],
+                    'why_description' => $servicesSec['why_description'],
+                    'why_cards' => json_decode($servicesSec['why_cards_json'] ?? '[]', true),
+                    'process_title' => $servicesSec['process_title'],
+                    'process_description' => $servicesSec['process_description'],
+                    'process_steps' => json_decode($servicesSec['process_steps_json'] ?? '[]', true)
+                ];
+            }
+
+            // 4. CONTACT SECTION
             $contact = $pdo->query("SELECT * FROM contact_section LIMIT 1")->fetch();
             if ($contact) {
                 $response['contact'] = [
@@ -132,11 +156,73 @@ try {
                     'facebook_link' => $contact['facebook_link'],
                     'instagram_link' => $contact['instagram_link'],
                     'linkedin_link' => $contact['linkedin_link'],
-                    'whatsapp_number' => $contact['whatsapp_number']
+                    'whatsapp_number' => $contact['whatsapp_number'],
+                    'project_manager_title' => $contact['project_manager_title'] ?? '',
+                    'project_manager_name' => $contact['project_manager_name'] ?? '',
+                    'project_manager_description' => $contact['project_manager_description'] ?? '',
+                    'opening_hours_title' => $contact['opening_hours_title'] ?? '',
+                    'opening_hours_monday_friday' => $contact['opening_hours_monday_friday'] ?? '',
+                    'opening_hours_saturday' => $contact['opening_hours_saturday'] ?? '',
+                    'opening_hours_sunday' => $contact['opening_hours_sunday'] ?? '',
+                    'form_title' => $contact['form_title'] ?? '',
+                    'form_button' => $contact['form_button'] ?? '',
+                    'map_embed_code' => $contact['map_embed_code'] ?? ''
                 ];
             }
             
-            // 4. LEGAL (Optional, usually loaded separately or page specific)
+            // 5. CATALOGS SECTION
+            $catalogsSec = $pdo->query("SELECT * FROM catalogs_section LIMIT 1")->fetch();
+            if ($catalogsSec) {
+                $response['catalogs'] = [
+                    'hero_image' => $catalogsSec['hero_image'],
+                    'show_in_index' => (bool)$catalogsSec['show_in_index'],
+                    'max_catalogs_index' => (int)$catalogsSec['max_catalogs_index'],
+                    'index_title' => $catalogsSec['index_title'],
+                    'index_description' => $catalogsSec['index_description'],
+                    'full_title' => $catalogsSec['full_title'],
+                    'full_description' => $catalogsSec['full_description']
+                ];
+            }
+
+            // 6. PORTFOLIO SECTION
+            try {
+                $portfolioSec = $pdo->query("SELECT * FROM portfolio_section LIMIT 1")->fetch();
+                if ($portfolioSec) {
+                    $response['portfolio'] = [
+                        'hero_image' => $portfolioSec['hero_image'] ?? '',
+                        'show_in_index' => (bool)($portfolioSec['show_in_index'] ?? 1),
+                        'max_items_index' => (int)($portfolioSec['max_items_index'] ?? 6),
+                        'index_title' => $portfolioSec['index_title'] ?? '',
+                        'index_description' => $portfolioSec['index_description'] ?? '',
+                        'full_title' => $portfolioSec['full_title'] ?? '',
+                        'full_description' => $portfolioSec['full_description'] ?? ''
+                    ];
+                } else {
+                    // Default values if table doesn't exist or is empty
+                    $response['portfolio'] = [
+                        'hero_image' => '',
+                        'show_in_index' => true,
+                        'max_items_index' => 6,
+                        'index_title' => 'Unser Baujournal',
+                        'index_description' => 'Aktuelle Projekte und Inspirationen.',
+                        'full_title' => 'Unsere Projekte',
+                        'full_description' => 'Eine Auswahl unserer erfolgreich abgeschlossenen Projekte'
+                    ];
+                }
+            } catch (PDOException $e) {
+                // Table doesn't exist - use defaults
+                $response['portfolio'] = [
+                    'hero_image' => '',
+                    'show_in_index' => true,
+                    'max_items_index' => 6,
+                    'index_title' => 'Unser Baujournal',
+                    'index_description' => 'Aktuelle Projekte und Inspirationen.',
+                    'full_title' => 'Unsere Projekte',
+                    'full_description' => 'Eine Auswahl unserer erfolgreich abgeschlossenen Projekte'
+                ];
+            }
+
+            // 7. LEGAL (Optional, usually loaded separately or page specific)
             // But we can include it if frontend expects it
             $legal = $pdo->query("SELECT * FROM legal_section LIMIT 1")->fetch();
             if ($legal) {

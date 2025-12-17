@@ -18,7 +18,7 @@ $avatarLetter = strtoupper(substr($username, 0, 1));
     <!-- Navigation (Scrollable) -->
     <div class="flex-1 overflow-y-auto py-4 px-3 custom-scrollbar">
         <nav class="space-y-1">
-            <p class="px-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Kryesore</p>
+            <p class="px-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Hauptmenü</p>
             
             <a href="dashboard.php" class="flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 text-sm <?php echo $currentPage === 'dashboard.php' ? 'bg-primary text-white shadow-md' : 'text-gray-400 hover:bg-gray-800 hover:text-white'; ?>">
                 <i class="fas fa-home w-5 text-center text-sm"></i>
@@ -27,29 +27,29 @@ $avatarLetter = strtoupper(substr($username, 0, 1));
             
             <a href="media-library.php" class="flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 text-sm <?php echo $currentPage === 'media-library.php' ? 'bg-primary text-white shadow-md' : 'text-gray-400 hover:bg-gray-800 hover:text-white'; ?>">
                 <i class="fas fa-photo-video w-5 text-center text-sm"></i>
-                <span class="font-medium">Media Library</span>
+                <span class="font-medium">Medienbibliothek</span>
             </a>
 
-            <p class="px-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 mt-4">Përmbajtja</p>
+            <p class="px-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 mt-4">Inhalte</p>
             
             <a href="hero.php" class="flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 text-sm <?php echo $currentPage === 'hero.php' ? 'bg-primary text-white shadow-md' : 'text-gray-400 hover:bg-gray-800 hover:text-white'; ?>">
                 <i class="fas fa-pager w-5 text-center text-sm"></i>
-                <span class="font-medium">Ballina (Hero)</span>
+                <span class="font-medium">Startseite (Hero)</span>
             </a>
             
             <a href="about.php" class="flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 text-sm <?php echo $currentPage === 'about.php' ? 'bg-primary text-white shadow-md' : 'text-gray-400 hover:bg-gray-800 hover:text-white'; ?>">
                 <i class="fas fa-info-circle w-5 text-center text-sm"></i>
-                <span class="font-medium">Rreth Nesh</span>
+                <span class="font-medium">Über uns</span>
             </a>
             
             <a href="services.php" class="flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 text-sm <?php echo $currentPage === 'services.php' ? 'bg-primary text-white shadow-md' : 'text-gray-400 hover:bg-gray-800 hover:text-white'; ?>">
                 <i class="fas fa-tools w-5 text-center text-sm"></i>
-                <span class="font-medium">Shërbimet</span>
+                <span class="font-medium">Leistungen</span>
             </a>
             
             <a href="catalogs.php" class="flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 text-sm <?php echo $currentPage === 'catalogs.php' ? 'bg-primary text-white shadow-md' : 'text-gray-400 hover:bg-gray-800 hover:text-white'; ?>">
                 <i class="fas fa-book-open w-5 text-center text-sm"></i>
-                <span class="font-medium">Katalogje</span>
+                <span class="font-medium">Kataloge</span>
             </a>
             
             <a href="projekte.php" class="flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 text-sm <?php echo $currentPage === 'projekte.php' ? 'bg-primary text-white shadow-md' : 'text-gray-400 hover:bg-gray-800 hover:text-white'; ?>">
@@ -64,12 +64,19 @@ $avatarLetter = strtoupper(substr($username, 0, 1));
             
             <a href="reviews.php" class="flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 text-sm <?php echo $currentPage === 'reviews.php' ? 'bg-primary text-white shadow-md' : 'text-gray-400 hover:bg-gray-800 hover:text-white'; ?>">
                 <i class="fas fa-star w-5 text-center text-sm"></i>
-                <span class="font-medium">Reviews</span>
+                <span class="font-medium">Bewertungen</span>
             </a>
             
             <a href="legal.php" class="flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 text-sm <?php echo $currentPage === 'legal.php' ? 'bg-primary text-white shadow-md' : 'text-gray-400 hover:bg-gray-800 hover:text-white'; ?>">
                 <i class="fas fa-balance-scale w-5 text-center text-sm"></i>
-                <span class="font-medium">Ligjore (AGB)</span>
+                <span class="font-medium">Rechtliches (AGB)</span>
+            </a>
+
+            <p class="px-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 mt-4">System</p>
+            
+            <a href="users.php" class="flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 text-sm <?php echo $currentPage === 'users.php' ? 'bg-primary text-white shadow-md' : 'text-gray-400 hover:bg-gray-800 hover:text-white'; ?>">
+                <i class="fas fa-users w-5 text-center text-sm"></i>
+                <span class="font-medium">Benutzer</span>
             </a>
         </nav>
     </div>
@@ -89,12 +96,12 @@ $avatarLetter = strtoupper(substr($username, 0, 1));
         <div class="grid grid-cols-2 gap-2 mb-2">
             <a href="change-password.php" class="flex items-center justify-center space-x-1.5 px-2 py-1.5 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 transition-all text-[11px] font-medium border border-gray-700">
                 <i class="fas fa-key text-[10px]"></i>
-                <span>Pass</span>
+                <span>Passwort</span>
             </a>
             
             <a href="logout.php" class="flex items-center justify-center space-x-1.5 px-2 py-1.5 rounded bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-all text-[11px] font-medium border border-red-500/20">
                 <i class="fas fa-sign-out-alt text-[10px]"></i>
-                <span>Dil</span>
+                <span>Abmelden</span>
             </a>
         </div>
         

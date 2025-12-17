@@ -1,59 +1,44 @@
 <?php
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
+require_once __DIR__ . '/../admin/includes/db_connect.php';
 
-function getDataPath($file) {
-    return dirname(__DIR__) . '/data/' . $file;
+// Only allow POST
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['success' => false, 'message' => 'Method not allowed']);
+    exit;
 }
 
-function readJson($file) {
-    $path = getDataPath($file);
-    if (!file_exists($path)) {
-        return [];
+// Get POST data
+$name = trim($_POST['name'] ?? '');
+$message = trim($_POST['message'] ?? '');
+$rating = (int)($_POST['rating'] ?? 5);
+
+// Validation
+if (empty($name) || empty($message)) {
+    echo json_encode(['success' => false, 'message' => 'Bitte füllen Sie alle Pflichtfelder aus.']);
+    exit;
+}
+
+if ($rating < 1 || $rating > 5) {
+    $rating = 5;
+}
+
+try {
+    // Insert into database with status 'pending'
+    $stmt = $pdo->prepare("INSERT INTO reviews (name, message, rating, status, date) VALUES (:name, :message, :rating, 'pending', NOW())");
+    $result = $stmt->execute([
+        'name' => htmlspecialchars($name),
+        'message' => htmlspecialchars($message),
+        'rating' => $rating
+    ]);
+
+    if ($result) {
+        echo json_encode(['success' => true, 'message' => 'Review submitted successfully']);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Database error']);
     }
-    $content = file_get_contents($path);
-    return json_decode($content, true) ?: [];
-}
-
-function writeJson($file, $data) {
-    $path = getDataPath($file);
-    $dir = dirname($path);
-    if (!is_dir($dir)) {
-        mkdir($dir, 0755, true);
-    }
-    return file_put_contents($path, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-}
-
-function sanitize($data) {
-    return htmlspecialchars(strip_tags(trim($data)));
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = sanitize($_POST['name'] ?? '');
-    $message = sanitize($_POST['message'] ?? '');
-    $rating = intval($_POST['rating'] ?? 0);
-    
-    if (empty($name) || empty($message) || $rating < 1 || $rating > 5) {
-        echo json_encode(['success' => false, 'message' => 'Të gjitha fushat duhen plotësuar!']);
-        exit;
-    }
-    
-    $reviews = readJson('reviews.json');
-    
-    $newReview = [
-        'id' => uniqid(),
-        'name' => $name,
-        'message' => $message,
-        'rating' => $rating,
-        'date' => date('Y-m-d H:i:s')
-    ];
-    
-    $reviews['pending'][] = $newReview;
-    writeJson('reviews.json', $reviews);
-    
-    echo json_encode(['success' => true, 'message' => 'Review u dërgua me sukses! Do të shqyrtrohet nga admin.']);
-} else {
-    echo json_encode(['success' => false, 'message' => 'Metodë e gabuar']);
+} catch (PDOException $e) {
+    echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
 }
 ?>
-

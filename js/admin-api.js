@@ -91,15 +91,28 @@ function renderServices(services, containerId, limit) {
             return;
         }
 
-        container.innerHTML = list.map(service => `
+        container.innerHTML = list.map(service => {
+            // Check if image exists and is not a placeholder/default that doesn't exist
+            const imagePath = service.image || '';
+            const hasValidImage = imagePath && 
+                                 !imagePath.includes('kiramika.png') && 
+                                 !imagePath.includes('mermeri.png') && 
+                                 !imagePath.includes('graniti.png') &&
+                                 !imagePath.includes('granit.png');
+            
+            return `
             <div class="group bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-500">
-                <div class="w-full h-36 rounded-lg overflow-hidden mb-4">
-                    <img src="${service.image || ''}" alt="${service.title || ''}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://via.placeholder.com/400x300?text=Service'">
+                <div class="w-full h-36 rounded-lg overflow-hidden mb-4 bg-gray-100">
+                    ${hasValidImage ? 
+                        `<img src="${imagePath}" alt="${service.title || ''}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" width="400" height="300" decoding="async" onerror="this.onerror=null; this.style.display='none'; this.parentElement.innerHTML='<div class=\\'w-full h-full bg-gray-100 flex items-center justify-center\\'><i class=\\'fas fa-image text-gray-400 text-4xl\\'></i></div>';">` :
+                        `<div class="w-full h-full bg-gray-100 flex items-center justify-center"><i class="fas fa-image text-gray-400 text-4xl"></i></div>`
+                    }
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 mb-2">${service.title || ''}</h3>
                 <p class="text-gray-600">${service.description || ''}</p>
             </div>
-        `).join('');
+        `;
+        }).join('');
     } catch (error) {
         console.error('Error in renderServices:', error);
     }
@@ -159,17 +172,6 @@ async function fetchPortfolio() {
     }
 }
 
-// Fetch activities (legacy placeholder)
-async function fetchActivities() {
-    try {
-        const response = await fetch(`${API_BASE}get-data.php?type=activities`);
-        const data = await response.json();
-        return data || [];
-    } catch (error) {
-        console.error('Error fetching activities:', error);
-        return [];
-    }
-}
 
 // Render catalogs as buttons
 function renderCatalogs(catalogs, containerId, limit) {
@@ -191,7 +193,8 @@ function renderCatalogs(catalogs, containerId, limit) {
 
     container.innerHTML = list.map((catalog, index) => `
         <a href="catalog-detail.html?id=${catalog.id}" 
-           class="group relative bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden block border-2 border-transparent hover:border-primary">
+           class="group relative bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden block border-2 border-transparent hover:border-primary"
+           onclick="console.log('Navigating to catalog ${catalog.id}')">
             <div class="relative h-48 sm:h-56 overflow-hidden">
                 ${catalog.cover_image ? `
                     <img src="${cleanPath(catalog.cover_image)}" 
@@ -269,6 +272,9 @@ function renderCatalogProducts(products, containerId) {
         return;
     }
 
+    // Debug log
+    console.log('Rendering catalog products:', products);
+
     container.innerHTML = products.map((product, index) => `
         <div class="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group" data-aos="fade-up" data-aos-delay="${index * 50}">
             <div class="relative h-64 overflow-hidden cursor-pointer" onclick="openImageLightbox('${product.image ? cleanPath(product.image) : ''}', '${(product.name || 'Produkt').replace(/'/g, "\\'")}')">
@@ -286,14 +292,17 @@ function renderCatalogProducts(products, containerId) {
                 `}
             </div>
             <div class="p-6">
-                <h3 class="text-xl font-bold text-gray-900 mb-3">${product.name || 'Produkt'}</h3>
-                ${product.description ? `
-                    <p class="text-gray-600 mb-4 line-clamp-3">${product.description}</p>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">${product.name || 'Produkt'}</h3>
+                ${product.price ? `
+                    <div class="text-lg font-bold text-primary mb-2">${product.price}</div>
                 ` : ''}
-                ${product.price && product.price.trim() !== '' ? `
-                    <div class="flex items-center justify-between pt-4 border-t border-gray-200">
-                        <span class="text-2xl font-bold text-primary">${product.price}</span>
+                ${product.specifications ? `
+                    <div class="text-sm text-gray-500 mb-2 font-medium bg-gray-100 px-2 py-1 rounded inline-block">
+                        <i class="fas fa-ruler-combined mr-1"></i> ${product.specifications}
                     </div>
+                ` : ''}
+                ${product.description ? `
+                    <p class="text-gray-600 mt-2 text-sm line-clamp-3">${product.description}</p>
                 ` : ''}
             </div>
         </div>
@@ -318,7 +327,7 @@ function renderPortfolio(items, containerId, limit) {
         <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100" data-aos="fade-up" data-aos-delay="${idx * 100}">
             <div class="h-64 overflow-hidden cursor-pointer" onclick="openImageLightbox('${cleanPath(item.path)}', '${(item.title || 'Projekt').replace(/'/g, "\\'")}')">
                 <img src="${cleanPath(item.path)}" alt="${item.title || ''}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy"
-                     onerror="this.src='https://via.placeholder.com/800x600?text=Projekt';">
+                     onerror="this.onerror=null; this.style.display='none'; this.parentElement.innerHTML='<div class=\\'w-full h-full bg-gray-100 flex items-center justify-center\\'><i class=\\'fas fa-image text-gray-400 text-4xl\\'></i></div>';">
                 <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
                     <i class="fas fa-expand text-white opacity-0 group-hover:opacity-100 transition-opacity text-2xl"></i>
                 </div>
@@ -356,7 +365,7 @@ function renderBlog(items, containerId, limit) {
             <div class="aspect-video relative overflow-hidden h-40 sm:h-48 lg:h-56">
                 <img src="${item.path}" alt="${item.title || ''}" loading="lazy"
                     class="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
-                    onerror="this.src='https://via.placeholder.com/800x600?text=Projekt';">
+                    onerror="this.onerror=null; this.style.display='none'; this.parentElement.innerHTML='<div class=\\'w-full h-full bg-gray-100 flex items-center justify-center\\'><i class=\\'fas fa-image text-gray-400 text-4xl\\'></i></div>';">
             </div>
             <div class="p-4 sm:p-5 lg:p-6">
                 <span class="inline-block px-2 sm:px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-semibold mb-2 sm:mb-3">${item.type || 'Projekt'}</span>
@@ -405,6 +414,16 @@ function cleanPath(val) {
     return val.trim().split(/\s+/)[0]; // use only first path, remove spaces
 }
 
+// Helper to set image src and show it
+function setImg(id, src) {
+    const el = document.getElementById(id);
+    if (el && src) {
+        el.src = cleanPath(src);
+        el.classList.remove('hidden');
+        el.style.display = '';
+    }
+}
+
 // Render customization data
 function renderCustomization(data) {
     if (!data || typeof data !== 'object') {
@@ -430,9 +449,7 @@ function renderCustomization(data) {
             if (btn2) btn2.href = data.hero.button2_link;
         }
         if (data.hero.image) {
-            const bgContainer = document.getElementById('hero-bg');
-            const cleaned = cleanPath(data.hero.image);
-            if (bgContainer && bgContainer.tagName === 'IMG') bgContainer.src = cleaned;
+            setImg('hero-bg', data.hero.image);
         }
         // Stats bar
         if (data.hero.stats_bar) {
@@ -455,7 +472,7 @@ function renderCustomization(data) {
                         <div class="flex items-center justify-center">
                             <img src="${cleanPath(logo)}" alt="Partner" class="h-20 sm:h-24 w-auto object-contain"
                                  loading="lazy"
-                                 onerror="this.src=\'https://via.placeholder.com/200x80?text=Partner\';">
+                                 onerror="this.onerror=null; this.style.display='none'; this.parentElement.innerHTML='<div class=\\'w-full h-full bg-gray-100 flex items-center justify-center\\'><i class=\\'fas fa-building text-gray-400 text-2xl\\'></i></div>';">
                         </div>
                     `).join('');
                     partnersEl.className = 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 items-center';
@@ -488,9 +505,9 @@ function renderCustomization(data) {
         if (data.about.processing_text) setText('about-proc-text', data.about.processing_text);
 
         // Images if IDs exist
-        if (data.about.image1 && document.getElementById('about-img1')) document.getElementById('about-img1').src = cleanPath(data.about.image1);
-        if (data.about.image2 && document.getElementById('about-img2')) document.getElementById('about-img2').src = cleanPath(data.about.image2);
-        if (data.about.image3 && document.getElementById('about-img3')) document.getElementById('about-img3').src = cleanPath(data.about.image3);
+        if (data.about.image1) setImg('about-img1', data.about.image1);
+        if (data.about.image2) setImg('about-img2', data.about.image2);
+        if (data.about.image3) setImg('about-img3', data.about.image3);
 
         // About cards
         setText('about-card1-title', data.about.card1_title);
@@ -614,6 +631,23 @@ function renderCustomization(data) {
         setLinkIfExists('footer-facebook', data.contact.facebook_link);
         setLinkIfExists('footer-instagram', data.contact.instagram_link);
         setLinkIfExists('footer-linkedin', data.contact.linkedin_link);
+
+        // Map Embed
+        const mapContainer = document.querySelector('#contact-map-container iframe');
+        // If container exists and we have code
+        if (data.contact.map_embed_code) {
+             const mapSection = document.getElementById('contact-map-container');
+             if (mapSection) {
+                 mapSection.innerHTML = data.contact.map_embed_code;
+                 // Add styles to iframe if needed to ensure it fits
+                 const iframe = mapSection.querySelector('iframe');
+                 if (iframe) {
+                     iframe.style.width = '100%';
+                     iframe.style.height = '100%';
+                     iframe.style.border = '0';
+                 }
+             }
+        }
     }
     } catch (error) {
         console.error('Error in renderCustomization:', error);
@@ -739,7 +773,7 @@ async function initDynamicContent() {
         const isAboutPage = !!aboutHeroEl;
         if (aboutHeroEl) {
             const heroSrc = aboutData.page_hero_image || aboutData.hero_image;
-            if (heroSrc) aboutHeroEl.src = cleanPath(heroSrc);
+            if (heroSrc) setImg('about-hero-bg', heroSrc);
         }
         if (isAboutPage) {
             // Hero section
@@ -788,8 +822,8 @@ async function initDynamicContent() {
     }
 
     // Services hero (full page)
-    if (customization?.services?.hero_image && document.getElementById('services-hero-bg')) {
-        document.getElementById('services-hero-bg').src = cleanPath(customization.services.hero_image);
+    if (customization?.services?.hero_image) {
+        setImg('services-hero-bg', customization.services.hero_image);
     }
     setText('services-hero-title', customization?.services?.full_title);
     setText('services-hero-subtitle', customization?.services?.full_description);
@@ -887,21 +921,21 @@ async function initDynamicContent() {
     }
 
     // Catalogs hero image
-    if (customization?.catalogs?.hero_image && document.getElementById('catalogs-hero-bg')) {
-        document.getElementById('catalogs-hero-bg').src = cleanPath(customization.catalogs.hero_image);
+    if (customization?.catalogs?.hero_image) {
+        setImg('catalogs-hero-bg', customization.catalogs.hero_image);
     }
 
     // Portfolio hero image
-    if (customization?.portfolio?.hero_image && document.getElementById('portfolio-hero-bg')) {
-        document.getElementById('portfolio-hero-bg').src = cleanPath(customization.portfolio.hero_image);
+    if (customization?.portfolio?.hero_image) {
+        setImg('portfolio-hero-bg', customization.portfolio.hero_image);
     }
 
     // Contact hero + info
     if (customization?.contact) {
         setText('contact-hero-title', customization.contact.section_title);
         setText('contact-hero-subtitle', customization.contact.section_subtitle || customization.contact.section_description);
-        if (customization.contact.hero_image && document.getElementById('contact-hero-bg')) {
-            document.getElementById('contact-hero-bg').src = cleanPath(customization.contact.hero_image);
+        if (customization.contact.hero_image) {
+            setImg('contact-hero-bg', customization.contact.hero_image);
         }
     }
 
@@ -925,7 +959,6 @@ if (typeof module !== 'undefined' && module.exports) {
         fetchReviews,
         fetchCatalogs,
         fetchPortfolio,
-        fetchActivities,
         submitReview,
         renderGallery,
         renderServices,

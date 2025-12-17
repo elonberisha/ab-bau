@@ -6,35 +6,51 @@ $pageTitle = 'Media Library';
 $message = '';
 $messageType = '';
 
+if (isset($_SESSION['message'])) {
+    $message = $_SESSION['message'];
+    $messageType = $_SESSION['message_type'];
+    unset($_SESSION['message']);
+    unset($_SESSION['message_type']);
+}
+
 // Get current folder
 $currentFolder = isset($_GET['folder']) ? sanitize($_GET['folder']) : '';
 $currentFolderPath = $currentFolder ? 'uploads/' . $currentFolder : 'uploads';
+
+// Helper to get redirect URL with current folder
+function getRedirectUrl($currentFolder) {
+    $url = 'media-library.php';
+    if ($currentFolder) {
+        $url .= '?folder=' . urlencode($currentFolder);
+    }
+    return $url;
+}
 
 // Handle folder creation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'create_folder') {
     $folderName = sanitize($_POST['folder_name'] ?? '');
     if (empty($folderName)) {
-        $message = 'Emri i folderit nuk mund të jetë bosh!';
-        $messageType = 'error';
+        $_SESSION['message'] = 'Der Ordnername darf nicht leer sein!';
+        $_SESSION['message_type'] = 'error';
     } else {
         $folderName = preg_replace('/[^a-zA-Z0-9_-]/', '', $folderName);
         $folderPath = dirname(__DIR__) . '/' . $currentFolderPath . '/' . $folderName;
         
         if (file_exists($folderPath)) {
-            $message = 'Ky folder ekziston tashmë!';
-            $messageType = 'error';
+                $_SESSION['message'] = 'Dieser Ordner existiert bereits!';
+            $_SESSION['message_type'] = 'error';
         } else {
             if (mkdir($folderPath, 0755, true)) {
-                $redirectUrl = 'media-library.php?success=folder_created';
-                if ($currentFolder) $redirectUrl .= '&folder=' . urlencode($currentFolder);
-                header('Location: ' . $redirectUrl);
-                exit;
+                $_SESSION['message'] = 'Ordner wurde erfolgreich erstellt!';
+                $_SESSION['message_type'] = 'success';
             } else {
-                $message = 'Gabim në krijimin e folderit!';
-                $messageType = 'error';
+                $_SESSION['message'] = 'Fehler beim Erstellen des Ordners!';
+                $_SESSION['message_type'] = 'error';
             }
         }
     }
+    header('Location: ' . getRedirectUrl($currentFolder));
+    exit;
 }
 
 // Handle folder deletion
@@ -51,14 +67,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $files = array_diff(scandir($fullPath), ['.', '..']);
         if (empty($files)) {
             if (@rmdir($fullPath)) {
-                header('Location: media-library.php?success=folder_deleted');
-                exit;
+                $_SESSION['message'] = 'Ordner wurde erfolgreich gelöscht!';
+                $_SESSION['message_type'] = 'success';
+            } else {
+                $_SESSION['message'] = 'Fehler beim Löschen des Ordners!';
+                $_SESSION['message_type'] = 'error';
             }
         } else {
-            $message = 'Folderi nuk është bosh! Fshini fillimisht fotot.';
-            $messageType = 'error';
+            $_SESSION['message'] = 'Der Ordner ist nicht leer! Bitte löschen Sie zuerst die Bilder.';
+            $_SESSION['message_type'] = 'error';
         }
     }
+    header('Location: ' . getRedirectUrl($currentFolder));
+    exit;
 }
 
 // Handle file upload
@@ -72,29 +93,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
         $result = uploadImage($_FILES['upload_file'], $targetFolder, $customFilename);
         
         if ($result['success']) {
-            $redirectUrl = 'media-library.php?success=uploaded&path=' . urlencode($result['path']);
-            if ($currentFolder) $redirectUrl .= '&folder=' . urlencode($currentFolder);
-            header('Location: ' . $redirectUrl);
-            exit;
+            $_SESSION['message'] = 'Bild wurde erfolgreich hochgeladen!';
+            $_SESSION['message_type'] = 'success';
         } else {
-            $message = $result['error'];
-            $messageType = 'error';
+            $_SESSION['message'] = $result['error'];
+            $_SESSION['message_type'] = 'error';
         }
     }
+    header('Location: ' . getRedirectUrl($currentFolder));
+    exit;
 }
 
 // Handle file deletion
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete') {
     $path = sanitize($_POST['path'] ?? '');
     if (deleteImage($path)) {
-        $redirectUrl = 'media-library.php?success=deleted';
-        if ($currentFolder) $redirectUrl .= '&folder=' . urlencode($currentFolder);
-        header('Location: ' . $redirectUrl);
-        exit;
+        $_SESSION['message'] = 'Bild wurde erfolgreich gelöscht!';
+        $_SESSION['message_type'] = 'success';
     } else {
-        $message = 'Gabim në fshirjen e fotos ose foto nuk u gjet.';
-        $messageType = 'error';
+        $_SESSION['message'] = 'Fehler beim Löschen des Bildes oder Bild nicht gefunden.';
+        $_SESSION['message_type'] = 'error';
     }
+    header('Location: ' . getRedirectUrl($currentFolder));
+    exit;
 }
 
 // Get directory contents
@@ -149,13 +170,19 @@ function formatFileSize($bytes) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="sq">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $pageTitle; ?> - Admin Panel</title>
     <link rel="stylesheet" href="../dist/css/output.css">
     <link rel="stylesheet" href="../assets/fontawesome/all.min.css">
+    <link rel="icon" type="image/x-icon" href="../favicon.ico" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Ab-Bau-Fliesen" />
+    <link rel="manifest" href="../site.webmanifest" />
 </head>
 <body class="bg-gray-100">
     <?php 
@@ -182,7 +209,7 @@ function formatFileSize($bytes) {
     <!-- Picker Mode Layout -->
     <div class="h-screen flex flex-col bg-gray-50">
         <header class="bg-white shadow-sm h-16 flex items-center justify-between px-6 border-b border-gray-200 flex-shrink-0">
-            <h1 class="text-xl font-bold text-gray-800">Zgjidhni një Foto</h1>
+            <h1 class="text-xl font-bold text-gray-800">Wählen Sie ein Bild</h1>
             <button onclick="window.close()" class="text-gray-500 hover:text-gray-700">
                 <i class="fas fa-times text-xl"></i>
             </button>
@@ -225,11 +252,11 @@ function formatFileSize($bytes) {
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="fas fa-folder-plus text-gray-400"></i>
                         </div>
-                        <input type="text" name="folder_name" placeholder="Krijo Folder të Ri..." required 
+                        <input type="text" name="folder_name" placeholder="Neuen Ordner erstellen..." required 
                                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary">
                     </div>
                     <button type="submit" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors border border-gray-200">
-                        Krijo
+                        Erstellen
                     </button>
                 </form>
                 
@@ -237,14 +264,24 @@ function formatFileSize($bytes) {
                 <div class="hidden md:block w-px bg-gray-200"></div>
                 
                 <!-- Upload Form -->
-                <form method="POST" enctype="multipart/form-data" class="flex-[2] flex gap-2 items-center">
-                    <div class="flex-1">
-                        <input type="file" name="upload_file" accept="image/*" required 
-                               class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20">
+                <form method="POST" enctype="multipart/form-data" class="flex-[2] flex flex-col gap-3">
+                    <div class="flex gap-2 items-center">
+                        <div class="flex-1">
+                            <input type="file" name="upload_file" id="upload_file" accept="image/*" required 
+                                   class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                                   onchange="updateFilenamePreview(this)">
+                        </div>
+                        <button type="submit" class="bg-primary text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-primary-dark transition-colors shadow-sm flex items-center">
+                            <i class="fas fa-cloud-upload-alt mr-2"></i> Upload
+                        </button>
                     </div>
-                    <button type="submit" class="bg-primary text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-primary-dark transition-colors shadow-sm flex items-center">
-                        <i class="fas fa-cloud-upload-alt mr-2"></i> Upload
-                    </button>
+                    <div class="flex gap-2 items-center">
+                        <label for="custom_filename" class="text-xs font-medium text-gray-600 whitespace-nowrap">Dateiname:</label>
+                        <input type="text" name="custom_filename" id="custom_filename" 
+                               placeholder="Leer lassen für automatischen Namen" 
+                               class="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                        <span class="text-xs text-gray-400" id="extension_preview"></span>
+                    </div>
                 </form>
             </div>
         </div>
@@ -267,7 +304,7 @@ function formatFileSize($bytes) {
                     
                     <!-- Delete Folder Button (Only visible on hover if empty) -->
                     <?php if ($folder['image_count'] == 0): ?>
-                    <form method="POST" onsubmit="return confirm('Fshi folderin?');" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <form method="POST" onsubmit="return confirm('Ordner löschen?');" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <input type="hidden" name="action" value="delete_folder">
                         <input type="hidden" name="folder_path" value="<?php echo htmlspecialchars($folder['path']); ?>">
                         <button type="submit" class="text-gray-400 hover:text-red-500 bg-white rounded-full p-1 shadow-sm">
@@ -287,17 +324,17 @@ function formatFileSize($bytes) {
                         <!-- Actions Overlay -->
                         <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-[2px]">
                             <?php if ($isPickerMode): ?>
-                                <button onclick="selectImage('<?php echo htmlspecialchars($image['path']); ?>')" class="bg-green-500 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-green-600 shadow-lg transform hover:scale-110 transition-all" title="Zgjidh">
+                                <button onclick="selectImage('<?php echo htmlspecialchars($image['path']); ?>')" class="bg-green-500 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-green-600 shadow-lg transform hover:scale-110 transition-all" title="Auswählen">
                                     <i class="fas fa-check"></i>
                                 </button>
                             <?php else: ?>
-                                <button onclick="copyUrl('<?php echo htmlspecialchars($image['path']); ?>')" class="bg-white text-gray-700 w-10 h-10 rounded-full flex items-center justify-center hover:text-blue-600 hover:bg-blue-50 shadow-lg transition-all" title="Kopjo URL">
+                                <button onclick="copyUrl('<?php echo htmlspecialchars($image['path']); ?>')" class="bg-white text-gray-700 w-10 h-10 rounded-full flex items-center justify-center hover:text-blue-600 hover:bg-blue-50 shadow-lg transition-all" title="URL kopieren">
                                     <i class="fas fa-link"></i>
                                 </button>
-                                <form method="POST" onsubmit="return confirm('A jeni i sigurt që doni ta fshini këtë foto?');" class="inline">
+                                <form method="POST" onsubmit="return confirm('Sind Sie sicher, dass Sie dieses Bild löschen möchten?');" class="inline">
                                     <input type="hidden" name="action" value="delete">
                                     <input type="hidden" name="path" value="<?php echo htmlspecialchars($image['path']); ?>">
-                                    <button type="submit" class="bg-white text-gray-700 w-10 h-10 rounded-full flex items-center justify-center hover:text-red-600 hover:bg-red-50 shadow-lg transition-all" title="Fshi">
+                                    <button type="submit" class="bg-white text-gray-700 w-10 h-10 rounded-full flex items-center justify-center hover:text-red-600 hover:bg-red-50 shadow-lg transition-all" title="Löschen">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
                                 </form>
@@ -319,8 +356,8 @@ function formatFileSize($bytes) {
                 <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
                     <i class="fas fa-cloud-upload-alt text-3xl text-gray-300"></i>
                 </div>
-                <h3 class="text-lg font-medium text-gray-900">Folderi është bosh</h3>
-                <p class="text-sm text-gray-500 mt-1">Krijoni një folder të ri ose ngarkoni foto.</p>
+                <h3 class="text-lg font-medium text-gray-900">Ordner ist leer</h3>
+                <p class="text-sm text-gray-500 mt-1">Erstellen Sie einen neuen Ordner oder laden Sie Bilder hoch.</p>
             </div>
         <?php endif; ?>
 
@@ -331,7 +368,7 @@ function formatFileSize($bytes) {
     <script>
         function copyUrl(path) {
             navigator.clipboard.writeText(path).then(() => {
-                alert('URL u kopjua në clipboard!');
+                alert('URL wurde in die Zwischenablage kopiert!');
             });
         }
 
@@ -340,7 +377,30 @@ function formatFileSize($bytes) {
                 window.opener.handleMediaSelect(path);
                 window.close();
             } else {
-                alert('Gabim: Dritarja kryesore nuk u gjet!');
+                alert('Fehler: Hauptfenster nicht gefunden!');
+            }
+        }
+
+        function updateFilenamePreview(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const fileName = file.name;
+                const extension = fileName.split('.').pop().toLowerCase();
+                const nameWithoutExt = fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
+                
+                // Update extension preview
+                const extensionPreview = document.getElementById('extension_preview');
+                if (extensionPreview) {
+                    extensionPreview.textContent = '.' + extension;
+                }
+                
+                // If custom filename is empty, suggest the original name without extension
+                const customFilenameInput = document.getElementById('custom_filename');
+                if (customFilenameInput && !customFilenameInput.value) {
+                    // Clean the name (remove special chars, keep only alphanumeric, dash, underscore)
+                    const cleanName = nameWithoutExt.replace(/[^a-zA-Z0-9_-]/g, '_');
+                    customFilenameInput.value = cleanName;
+                }
             }
         }
     </script>

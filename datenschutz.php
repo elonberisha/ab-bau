@@ -1,64 +1,36 @@
 <?php
-// Load legal data
-function loadLegalData() {
-    $path = __DIR__ . '/data/legal.json';
-    if (!file_exists($path)) {
-        return [];
-    }
-    $content = file_get_contents($path);
-    // Remove UTF-8 BOM if present
-    if (substr($content, 0, 3) == "\xef\xbb\xbf") {
-        $content = substr($content, 3);
-    }
-    // Ensure UTF-8 encoding
-    if (!mb_check_encoding($content, 'UTF-8')) {
-        $content = mb_convert_encoding($content, 'UTF-8', 'auto');
-    }
-    $decoded = json_decode($content, true);
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        error_log("JSON decode error in datenschutz.php: " . json_last_error_msg());
-        return [];
-    }
-    return $decoded ?: [];
+require_once 'admin/includes/db_connect.php';
+
+// Fetch Legal Data
+try {
+    $stmt = $pdo->query("SELECT * FROM legal_section LIMIT 1");
+    $legal = $stmt->fetch();
+} catch (PDOException $e) {
+    $legal = [];
 }
 
-$legal = loadLegalData();
-$datenschutz = $legal['datenschutz'] ?? [];
-$impressum = $legal['impressum'] ?? [];
-
-// Helper function to safely get values with proper UTF-8 encoding
-function getValue($data, $default = '') {
-    $value = $data ?? $default;
-    // Ensure UTF-8 encoding and escape HTML special characters
-    if (is_string($value)) {
-        // Convert to UTF-8 if not already
-        if (!mb_check_encoding($value, 'UTF-8')) {
-            $value = mb_convert_encoding($value, 'UTF-8', 'auto');
-        }
-    }
-    return htmlspecialchars($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-}
+$privacyContent = $legal['privacy_content'] ?? '<p class="text-center py-10">Përmbajtja nuk është disponueshme.</p>';
 ?>
 <!DOCTYPE html>
-<html lang="de" dir="ltr" xmlns="http://www.w3.org/1999/xhtml">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta http-equiv="Content-Language" content="de">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <meta name="description" content="Datenschutzerklärung - <?php echo getValue($impressum['company_name'] ?? ''); ?>">
-    <meta name="language" content="de">
-    <meta name="geo.region" content="DE">
-    <title>Datenschutz - <?php echo getValue($impressum['company_name'] ?? ''); ?></title>
+    <meta name="description" content="Datenschutz - AB Bau">
+    <title>Datenschutz - AB Bau | Bau und Fliesen UG</title>
     
     <!-- Tailwind CSS -->
     <link rel="stylesheet" href="dist/css/output.css">
     
-    <!-- Google Fonts (Local) -->
-    <link rel="stylesheet" href="assets/css/google-fonts.css">
-    
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/styles.css">
+
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Ab-Bau-Fliesen" />
+    <link rel="manifest" href="site.webmanifest" />
 </head>
 <body class="font-sans antialiased">
     
@@ -75,21 +47,11 @@ function getValue($data, $default = '') {
                 
                 <!-- Desktop Menu -->
                 <ul class="hidden lg:flex items-center space-x-1 xl:space-x-2">
-                    <li><a href="about.html" class="nav-link px-4 py-2 text-gray-800 hover:text-primary font-medium text-sm xl:text-base transition-all duration-300 rounded-lg hover:bg-gray-50">
-                        Über uns
-                    </a></li>
-                    <li><a href="services.html" class="nav-link px-4 py-2 text-gray-800 hover:text-primary font-medium text-sm xl:text-base transition-all duration-300 rounded-lg hover:bg-gray-50">
-                        Leistungen
-                    </a></li>
-                    <li><a href="portfolio.html" class="nav-link px-4 py-2 text-gray-800 hover:text-primary font-medium text-sm xl:text-base transition-all duration-300 rounded-lg hover:bg-gray-50">
-                        Projekte
-                    </a></li>
-                    <li><a href="catalogs.html" class="nav-link px-4 py-2 text-gray-800 hover:text-primary font-medium text-sm xl:text-base transition-all duration-300 rounded-lg hover:bg-gray-50">
-                        Kataloge
-                    </a></li>
-                    <li><a href="contact.html" class="nav-link px-4 py-2 text-gray-800 hover:text-primary font-medium text-sm xl:text-base transition-all duration-300 rounded-lg hover:bg-gray-50">
-                        Kontakt
-                    </a></li>
+                    <li><a href="about.html" class="nav-link px-4 py-2 text-gray-800 hover:text-primary font-medium text-sm xl:text-base transition-all duration-300 rounded-lg hover:bg-gray-50">Über uns</a></li>
+                    <li><a href="services.html" class="nav-link px-4 py-2 text-gray-800 hover:text-primary font-medium text-sm xl:text-base transition-all duration-300 rounded-lg hover:bg-gray-50">Leistungen</a></li>
+                    <li><a href="portfolio.html" class="nav-link px-4 py-2 text-gray-800 hover:text-primary font-medium text-sm xl:text-base transition-all duration-300 rounded-lg hover:bg-gray-50">Projekte</a></li>
+                    <li><a href="catalogs.html" class="nav-link px-4 py-2 text-gray-800 hover:text-primary font-medium text-sm xl:text-base transition-all duration-300 rounded-lg hover:bg-gray-50">Kataloge</a></li>
+                    <li><a href="contact.html" class="nav-link px-4 py-2 text-gray-800 hover:text-primary font-medium text-sm xl:text-base transition-all duration-300 rounded-lg hover:bg-gray-50">Kontakt</a></li>
                 </ul>
                 
                 <!-- Mobile Menu Button -->
@@ -125,218 +87,11 @@ function getValue($data, $default = '') {
         </div>
     </section>
 
-    <!-- Datenschutz Content -->
+    <!-- Content -->
     <section class="py-16 sm:py-20 lg:py-24 bg-white">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
-            <div class="prose prose-lg max-w-none">
-                
-                <?php if (isset($datenschutz['sections']['datenschutz_auf_einen_blick'])): ?>
-                <h2 class="text-2xl font-bold text-gray-900 mb-6" id="datenschutz-blick">1. Datenschutz auf einen Blick</h2>
-                
-                <?php if (!empty($datenschutz['sections']['datenschutz_auf_einen_blick']['allgemeine_hinweise'])): ?>
-                <h3 class="text-xl font-bold text-gray-900 mb-4 mt-8">Allgemeine Hinweise</h3>
-                <p class="mb-6 text-gray-700">
-                    <?php echo nl2br(getValue($datenschutz['sections']['datenschutz_auf_einen_blick']['allgemeine_hinweise'])); ?>
-                </p>
-                <?php endif; ?>
-
-                <?php if (!empty($datenschutz['sections']['datenschutz_auf_einen_blick']['datenerfassung'])): ?>
-                <h3 class="text-xl font-bold text-gray-900 mb-4 mt-8">Datenerfassung auf dieser Website</h3>
-                <p class="mb-6 text-gray-700">
-                    <?php echo nl2br(getValue($datenschutz['sections']['datenschutz_auf_einen_blick']['datenerfassung'])); ?>
-                </p>
-                <?php endif; ?>
-
-                <?php if (!empty($datenschutz['sections']['datenschutz_auf_einen_blick']['datenverwendung'])): ?>
-                <h3 class="text-xl font-bold text-gray-900 mb-4 mt-8">Wie werden Ihre Daten verwendet?</h3>
-                <p class="mb-6 text-gray-700">
-                    <?php echo nl2br(getValue($datenschutz['sections']['datenschutz_auf_einen_blick']['datenverwendung'])); ?>
-                </p>
-                <?php endif; ?>
-
-                <?php if (!empty($datenschutz['sections']['datenschutz_auf_einen_blick']['rechte'])): ?>
-                <h3 class="text-xl font-bold text-gray-900 mb-4 mt-8">Welche Rechte haben Sie?</h3>
-                <p class="mb-6 text-gray-700">
-                    <?php echo nl2br(getValue($datenschutz['sections']['datenschutz_auf_einen_blick']['rechte'])); ?>
-                </p>
-                <?php endif; ?>
-                <?php endif; ?>
-
-                <?php if (!empty($datenschutz['sections']['hosting'])): ?>
-                <h2 class="text-2xl font-bold text-gray-900 mb-6 mt-12" id="hosting">2. Hosting</h2>
-                <p class="mb-6 text-gray-700">
-                    <?php echo nl2br(getValue($datenschutz['sections']['hosting'])); ?>
-                </p>
-                <?php endif; ?>
-
-                <h2 class="text-2xl font-bold text-gray-900 mb-6 mt-12" id="allgemeine">3. Allgemeine Hinweise und Pflichtinformationen</h2>
-                
-                <h3 class="text-xl font-bold text-gray-900 mb-4 mt-8">Hinweis zur verantwortlichen Stelle</h3>
-                <p class="mb-4 text-gray-700">Die verantwortliche Stelle für die Datenverarbeitung auf dieser Website ist:</p>
-                <div class="mb-6 text-gray-700 bg-gray-50 p-4 rounded-lg">
-                    <?php if (!empty($datenschutz['responsible_person']['name'])): ?>
-                    <p class="mb-2"><strong><?php echo getValue($datenschutz['responsible_person']['name']); ?></strong></p>
-                    <?php endif; ?>
-                    <?php if (!empty($datenschutz['responsible_person']['person'])): ?>
-                    <p class="mb-2"><?php echo getValue($datenschutz['responsible_person']['person']); ?></p>
-                    <?php endif; ?>
-                    <?php if (!empty($datenschutz['responsible_person']['address']['street'])): ?>
-                    <p class="mb-2"><?php echo getValue($datenschutz['responsible_person']['address']['street']); ?></p>
-                    <?php endif; ?>
-                    <?php if (!empty($datenschutz['responsible_person']['address']['city'])): ?>
-                    <p class="mb-2"><?php echo getValue($datenschutz['responsible_person']['address']['city']); ?></p>
-                    <?php endif; ?>
-                    <?php if (!empty($datenschutz['responsible_person']['address']['country'])): ?>
-                    <p class="mb-2"><?php echo getValue($datenschutz['responsible_person']['address']['country']); ?></p>
-                    <?php endif; ?>
-                    <?php if (!empty($datenschutz['responsible_person']['phone'])): ?>
-                    <p class="mb-2"><strong>Telefon:</strong> <a href="tel:<?php echo preg_replace('/[^0-9+]/', '', $datenschutz['responsible_person']['phone']); ?>" class="text-primary hover:underline"><?php echo getValue($datenschutz['responsible_person']['phone']); ?></a></p>
-                    <?php endif; ?>
-                    <?php if (!empty($datenschutz['responsible_person']['email'])): ?>
-                    <p class="mb-2"><strong>E-Mail:</strong> <a href="mailto:<?php echo getValue($datenschutz['responsible_person']['email']); ?>" class="text-primary hover:underline"><?php echo getValue($datenschutz['responsible_person']['email']); ?></a></p>
-                    <?php endif; ?>
-                </div>
-
-                <?php if (isset($datenschutz['sections']['allgemeine_hinweise'])): ?>
-                <?php if (!empty($datenschutz['sections']['allgemeine_hinweise']['datenschutz'])): ?>
-                <h3 class="text-xl font-bold text-gray-900 mb-4 mt-8">Datenschutz</h3>
-                <p class="mb-6 text-gray-700">
-                    <?php echo nl2br(getValue($datenschutz['sections']['allgemeine_hinweise']['datenschutz'])); ?>
-                </p>
-                <?php endif; ?>
-
-                <?php if (!empty($datenschutz['sections']['allgemeine_hinweise']['speicherdauer'])): ?>
-                <h3 class="text-xl font-bold text-gray-900 mb-4 mt-8">Speicherdauer</h3>
-                <p class="mb-6 text-gray-700">
-                    <?php echo nl2br(getValue($datenschutz['sections']['allgemeine_hinweise']['speicherdauer'])); ?>
-                </p>
-                <?php endif; ?>
-
-                <?php if (!empty($datenschutz['sections']['allgemeine_hinweise']['rechtsgrundlagen'])): ?>
-                <h3 class="text-xl font-bold text-gray-900 mb-4 mt-8">Rechtsgrundlagen</h3>
-                <p class="mb-6 text-gray-700">
-                    <?php echo nl2br(getValue($datenschutz['sections']['allgemeine_hinweise']['rechtsgrundlagen'])); ?>
-                </p>
-                <?php endif; ?>
-
-                <?php if (!empty($datenschutz['sections']['allgemeine_hinweise']['widerruf'])): ?>
-                <h3 class="text-xl font-bold text-gray-900 mb-4 mt-8">Widerruf Ihrer Einwilligung zur Datenverarbeitung</h3>
-                <p class="mb-6 text-gray-700">
-                    <?php echo nl2br(getValue($datenschutz['sections']['allgemeine_hinweise']['widerruf'])); ?>
-                </p>
-                <?php endif; ?>
-
-                <?php if (!empty($datenschutz['sections']['allgemeine_hinweise']['widerspruchsrecht'])): ?>
-                <h3 class="text-xl font-bold text-gray-900 mb-4 mt-8">Widerspruchsrecht</h3>
-                <p class="mb-6 text-gray-700">
-                    <?php echo nl2br(getValue($datenschutz['sections']['allgemeine_hinweise']['widerspruchsrecht'])); ?>
-                </p>
-                <?php endif; ?>
-
-                <?php if (!empty($datenschutz['sections']['allgemeine_hinweise']['beschwerderecht'])): ?>
-                <h3 class="text-xl font-bold text-gray-900 mb-4 mt-8">Beschwerderecht</h3>
-                <p class="mb-6 text-gray-700">
-                    <?php echo nl2br(getValue($datenschutz['sections']['allgemeine_hinweise']['beschwerderecht'])); ?>
-                </p>
-                <?php endif; ?>
-
-                <?php if (!empty($datenschutz['sections']['allgemeine_hinweise']['datenuebertragbarkeit'])): ?>
-                <h3 class="text-xl font-bold text-gray-900 mb-4 mt-8">Datenübertragbarkeit</h3>
-                <p class="mb-6 text-gray-700">
-                    <?php echo nl2br(getValue($datenschutz['sections']['allgemeine_hinweise']['datenuebertragbarkeit'])); ?>
-                </p>
-                <?php endif; ?>
-
-                <?php if (!empty($datenschutz['sections']['allgemeine_hinweise']['ssl_tls'])): ?>
-                <h3 class="text-xl font-bold text-gray-900 mb-4 mt-8">SSL- bzw. TLS-Verschlüsselung</h3>
-                <p class="mb-6 text-gray-700">
-                    <?php echo nl2br(getValue($datenschutz['sections']['allgemeine_hinweise']['ssl_tls'])); ?>
-                </p>
-                <?php endif; ?>
-
-                <?php if (!empty($datenschutz['sections']['allgemeine_hinweise']['auskunft_loeschung'])): ?>
-                <h3 class="text-xl font-bold text-gray-900 mb-4 mt-8">Auskunft, Löschung und Berichtigung</h3>
-                <p class="mb-6 text-gray-700">
-                    <?php echo nl2br(getValue($datenschutz['sections']['allgemeine_hinweise']['auskunft_loeschung'])); ?>
-                </p>
-                <?php endif; ?>
-
-                <?php if (!empty($datenschutz['sections']['allgemeine_hinweise']['einschraenkung'])): ?>
-                <h3 class="text-xl font-bold text-gray-900 mb-4 mt-8">Recht auf Einschränkung der Verarbeitung</h3>
-                <p class="mb-6 text-gray-700">
-                    <?php echo nl2br(getValue($datenschutz['sections']['allgemeine_hinweise']['einschraenkung'])); ?>
-                </p>
-                <?php endif; ?>
-                <?php endif; ?>
-
-                <?php if (isset($datenschutz['sections']['datenerfassung'])): ?>
-                <h2 class="text-2xl font-bold text-gray-900 mb-6 mt-12" id="datenerfassung">4. Datenerfassung auf dieser Website</h2>
-                
-                <?php if (!empty($datenschutz['sections']['datenerfassung']['kontaktformular'])): ?>
-                <h3 class="text-xl font-bold text-gray-900 mb-4 mt-8">Kontaktformular</h3>
-                <p class="mb-6 text-gray-700">
-                    <?php echo nl2br(getValue($datenschutz['sections']['datenerfassung']['kontaktformular'])); ?>
-                </p>
-                <?php endif; ?>
-
-                <?php if (!empty($datenschutz['sections']['datenerfassung']['server_log'])): ?>
-                <h3 class="text-xl font-bold text-gray-900 mb-4 mt-8">Server-Log-Dateien</h3>
-                <p class="mb-6 text-gray-700">
-                    <?php echo nl2br(getValue($datenschutz['sections']['datenerfassung']['server_log'])); ?>
-                </p>
-                <?php endif; ?>
-                <?php endif; ?>
-
-                <?php if (isset($datenschutz['sections']['cookies'])): ?>
-                <h2 class="text-2xl font-bold text-gray-900 mb-6 mt-12" id="cookies">5. Cookies</h2>
-                
-                <?php if (!empty($datenschutz['sections']['cookies']['allgemeine_informationen'])): ?>
-                <h3 class="text-xl font-bold text-gray-900 mb-4 mt-8">Allgemeine Informationen zu Cookies</h3>
-                <p class="mb-6 text-gray-700">
-                    <?php echo nl2br(getValue($datenschutz['sections']['cookies']['allgemeine_informationen'])); ?>
-                </p>
-                <?php endif; ?>
-
-                <?php if (!empty($datenschutz['sections']['cookies']['zukunft'])): ?>
-                <h3 class="text-xl font-bold text-gray-900 mb-4 mt-8">Zukunft</h3>
-                <p class="mb-6 text-gray-700">
-                    <?php echo nl2br(getValue($datenschutz['sections']['cookies']['zukunft'])); ?>
-                </p>
-                <?php endif; ?>
-
-                <?php if (!empty($datenschutz['sections']['cookies']['technisch_notwendig'])): ?>
-                <h3 class="text-xl font-bold text-gray-900 mb-4 mt-8">Technisch notwendige Cookies</h3>
-                <p class="mb-6 text-gray-700">
-                    <?php echo nl2br(getValue($datenschutz['sections']['cookies']['technisch_notwendig'])); ?>
-                </p>
-                <?php endif; ?>
-                <?php endif; ?>
-
-                <?php if (isset($datenschutz['sections']['plugins'])): ?>
-                <h2 class="text-2xl font-bold text-gray-900 mb-6 mt-12">6. Plugins und Tools</h2>
-                
-                <?php if (!empty($datenschutz['sections']['plugins']['google_fonts'])): ?>
-                <h3 class="text-xl font-bold text-gray-900 mb-4 mt-8">Google Fonts (lokales Hosting)</h3>
-                <p class="mb-6 text-gray-700">
-                    <?php echo nl2br(getValue($datenschutz['sections']['plugins']['google_fonts'])); ?>
-                </p>
-                <?php endif; ?>
-
-                <?php if (!empty($datenschutz['sections']['plugins']['font_awesome'])): ?>
-                <h3 class="text-xl font-bold text-gray-900 mb-4 mt-8">Font Awesome</h3>
-                <p class="mb-6 text-gray-700">
-                    <?php echo nl2br(getValue($datenschutz['sections']['plugins']['font_awesome'])); ?>
-                </p>
-                <?php endif; ?>
-                <?php endif; ?>
-
-                <?php if (!empty($datenschutz['sections']['aenderung'])): ?>
-                <h2 class="text-2xl font-bold text-gray-900 mb-6 mt-12">7. Änderung dieser Datenschutzerklärung</h2>
-                <p class="mb-6 text-gray-700">
-                    <?php echo nl2br(getValue($datenschutz['sections']['aenderung'])); ?>
-                </p>
-                <?php endif; ?>
-
+            <div class="prose prose-lg max-w-none text-gray-700">
+                <?php echo $privacyContent; ?>
             </div>
         </div>
     </section>
@@ -348,8 +103,7 @@ function getValue($data, $default = '') {
                 <div>
                     <div class="flex items-center space-x-3 mb-4">
                         <a href="index.html" class="flex items-center space-x-3 group">
-                            <img src="logo.svg" alt="AB Bau Logo"
-                                class="h-10 sm:h-12 w-auto brightness-0 invert transition-transform duration-300 group-hover:scale-105">
+                            <img src="logo.svg" alt="AB Bau Logo" class="h-10 sm:h-12 w-auto brightness-0 invert transition-transform duration-300 group-hover:scale-105">
                             <span class="text-xl font-bold">AB BAU</span>
                         </a>
                     </div>
@@ -368,13 +122,9 @@ function getValue($data, $default = '') {
                 <div>
                     <h4 class="font-bold mb-4">Kontakt</h4>
                     <ul class="space-y-2 text-gray-400 text-sm">
-                        <li><a href="contact.html" class="hover:text-white transition-colors"><?php echo getValue($impressum['address']['street'] ?? ''); ?>, <?php echo getValue($impressum['address']['city'] ?? ''); ?></a></li>
-                        <?php if (!empty($impressum['contact']['phone'])): ?>
-                        <li><a href="tel:<?php echo preg_replace('/[^0-9+]/', '', $impressum['contact']['phone']); ?>" class="hover:text-white transition-colors break-all"><?php echo getValue($impressum['contact']['phone']); ?></a></li>
-                        <?php endif; ?>
-                        <?php if (!empty($impressum['contact']['email'])): ?>
-                        <li><a href="mailto:<?php echo getValue($impressum['contact']['email']); ?>" class="hover:text-white transition-colors break-all"><?php echo getValue($impressum['contact']['email']); ?></a></li>
-                        <?php endif; ?>
+                        <li><a href="contact.html" class="hover:text-white transition-colors">Talstraße 3d, 85238 Petershausen</a></li>
+                        <li><a href="tel:081379957477" class="hover:text-white transition-colors break-all">08137 9957477</a></li>
+                        <li><a href="mailto:office@ab-bau.de" class="hover:text-white transition-colors break-all">office@ab-bau.de</a></li>
                     </ul>
                 </div>
                 <div>
@@ -387,16 +137,18 @@ function getValue($data, $default = '') {
                 </div>
             </div>
             <div class="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
-                <p>&copy; 2025 <?php echo getValue($impressum['company_name'] ?? ''); ?><?php echo !empty($impressum['legal_form']) ? ' (' . getValue($impressum['legal_form']) . ')' : ''; ?>. Alle Rechte vorbehalten. | 
+                <p>&copy; 2025 AB Bau - Bau und Fliesen UG (haftungsbeschränkt). Alle Rechte vorbehalten. | 
                 <a href="impressum.php" class="hover:text-white transition-colors">Impressum</a> | 
                 <a href="datenschutz.php" class="hover:text-white transition-colors">Datenschutz</a> | 
                 <a href="agb.php" class="hover:text-white transition-colors">AGB</a></p>
+                <p class="mt-2 text-xs text-gray-500">
+                    Powered by <a href="https://devycore.com/" target="_blank" rel="noopener noreferrer" class="hover:text-primary transition-colors">Devycore</a>
+                </p>
             </div>
         </div>
     </footer>
 
-    <!-- Scripts -->
     <script src="js/script.js"></script>
+    <script src="js/admin-api.js?v=2"></script>
 </body>
 </html>
-
