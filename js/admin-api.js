@@ -461,6 +461,7 @@ function renderCustomization(data) {
 
     // Hero Section (only on index.html)
     if (data.hero) {
+        if (data.hero.mini_text) setText('hero-mini-text', data.hero.mini_text);
         if (data.hero.title) setHTMLSafe('hero-title', data.hero.title);
         if (data.hero.subtitle) setText('hero-subtitle', data.hero.subtitle);
         if (data.hero.button1_text) setText('hero-btn1-text', data.hero.button1_text);

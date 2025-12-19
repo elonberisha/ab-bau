@@ -345,28 +345,44 @@ function getSectionData($table) {
 function updateSectionData($table, $data) {
     global $pdo;
     $allowedTables = ['hero_section', 'about_section', 'contact_section', 'legal_section', 'services_section', 'catalogs_section', 'portfolio_section'];
-    if (!in_array($table, $allowedTables)) return false;
+    if (!in_array($table, $allowedTables)) {
+        error_log("Invalid table name for updateSectionData: $table");
+        return false;
+    }
 
-    $stmt = $pdo->query("SELECT id FROM $table LIMIT 1");
-    $exists = $stmt->fetch();
+    try {
+        $stmt = $pdo->query("SELECT id FROM $table LIMIT 1");
+        $exists = $stmt->fetch();
 
-    if ($exists) {
-        $fields = [];
-        $params = [];
-        foreach ($data as $key => $value) {
-            $fields[] = "$key = :$key";
-            $params[$key] = $value;
+        if ($exists) {
+            $fields = [];
+            $params = [];
+            foreach ($data as $key => $value) {
+                $fields[] = "$key = :$key";
+                $params[$key] = $value;
+            }
+            $params['id'] = $exists['id'];
+            $sql = "UPDATE $table SET " . implode(', ', $fields) . " WHERE id = :id";
+            $stmt = $pdo->prepare($sql);
+            $result = $stmt->execute($params);
+            if (!$result) {
+                error_log("Failed to update $table: " . implode(', ', $stmt->errorInfo()));
+            }
+            return $result;
+        } else {
+            $columns = implode(', ', array_keys($data));
+            $placeholders = ':' . implode(', :', array_keys($data));
+            $sql = "INSERT INTO $table ($columns) VALUES ($placeholders)";
+            $stmt = $pdo->prepare($sql);
+            $result = $stmt->execute($data);
+            if (!$result) {
+                error_log("Failed to insert into $table: " . implode(', ', $stmt->errorInfo()));
+            }
+            return $result;
         }
-        $params['id'] = $exists['id'];
-        $sql = "UPDATE $table SET " . implode(', ', $fields) . " WHERE id = :id";
-        $stmt = $pdo->prepare($sql);
-        return $stmt->execute($params);
-    } else {
-        $columns = implode(', ', array_keys($data));
-        $placeholders = ':' . implode(', :', array_keys($data));
-        $sql = "INSERT INTO $table ($columns) VALUES ($placeholders)";
-        $stmt = $pdo->prepare($sql);
-        return $stmt->execute($data);
+    } catch (PDOException $e) {
+        error_log("PDOException in updateSectionData for table $table: " . $e->getMessage());
+        return false;
     }
 }
 

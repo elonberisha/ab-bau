@@ -19,6 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'title' => sanitize($_POST['title']),
         'subtitle' => sanitize($_POST['subtitle']),
         'image' => sanitize($_POST['image']),
+        'mini_text' => sanitize($_POST['mini_text'] ?? ''),
         'button1_text' => sanitize($_POST['button1_text']),
         'button1_link' => sanitize($_POST['button1_link']),
         'button2_text' => sanitize($_POST['button2_text']),
@@ -107,6 +108,15 @@ $hero = getSectionData('hero_section');
                         </h2>
                         
                         <div class="grid grid-cols-1 gap-6">
+                            <!-- Mini Text -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Mini Text (Badge)</label>
+                                <input type="text" name="mini_text" value="<?php echo htmlspecialchars($hero['mini_text'] ?? 'PREMIUM QUALITÄT SEIT 2010'); ?>" 
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                                       placeholder="z.B. PREMIUM QUALITÄT SEIT 2010">
+                                <p class="text-xs text-gray-500 mt-1">Kleiner Text der über dem Haupttitel angezeigt wird</p>
+                            </div>
+
                             <!-- Title -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Haupttitel</label>

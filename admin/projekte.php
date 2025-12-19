@@ -12,6 +12,57 @@ if (isset($_SESSION['message'])) {
     unset($_SESSION['message_type']);
 }
 
+// Handle section update FIRST (before CRUD)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_section') {
+    try {
+        // First, ensure the table exists
+        try {
+            $pdo->query("SELECT 1 FROM portfolio_section LIMIT 1");
+        } catch (PDOException $e) {
+            // Table doesn't exist, create it
+            $createTableSQL = "CREATE TABLE IF NOT EXISTS `portfolio_section` (
+                `id` int(11) NOT NULL AUTO_INCREMENT,
+                `hero_image` varchar(500) DEFAULT NULL,
+                `show_in_index` tinyint(1) DEFAULT 1,
+                `max_items_index` int(11) DEFAULT 6,
+                `index_title` varchar(255) DEFAULT NULL,
+                `index_description` text DEFAULT NULL,
+                `full_title` varchar(255) DEFAULT NULL,
+                `full_description` text DEFAULT NULL,
+                PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+            $pdo->exec($createTableSQL);
+        }
+        
+        $data = [
+            'hero_image' => sanitize($_POST['hero_image'] ?? ''),
+            'show_in_index' => isset($_POST['show_in_index']) ? 1 : 0,
+            'max_items_index' => (int)($_POST['max_items_index'] ?? 6),
+            'index_title' => sanitize($_POST['index_title'] ?? ''),
+            'index_description' => sanitize($_POST['index_description'] ?? ''),
+            'full_title' => sanitize($_POST['full_title'] ?? ''),
+            'full_description' => sanitize($_POST['full_description'] ?? '')
+        ];
+        
+        if (updateSectionData('portfolio_section', $data)) {
+            $_SESSION['message'] = 'Seiteneinstellungen wurden erfolgreich aktualisiert!';
+            $_SESSION['message_type'] = 'success';
+        } else {
+            $_SESSION['message'] = 'Fehler beim Aktualisieren der Einstellungen. Bitte versuchen Sie es erneut.';
+            $_SESSION['message_type'] = 'error';
+        }
+        $_SESSION['open_section'] = 'pageSettings';
+        header("Location: projekte.php");
+        exit;
+    } catch (Exception $e) {
+        $_SESSION['message'] = 'Fehler beim Aktualisieren der Einstellungen: ' . htmlspecialchars($e->getMessage());
+        $_SESSION['message_type'] = 'error';
+        $_SESSION['open_section'] = 'pageSettings';
+        header("Location: projekte.php");
+        exit;
+    }
+}
+
 // Handle CRUD
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
@@ -67,36 +118,14 @@ $projects = $pdo->query("SELECT * FROM projects ORDER BY date DESC")->fetchAll()
 // Get portfolio section data
 $sectionData = getSectionData('portfolio_section');
 
+// Check if section should be open (before unsetting)
 $pageSettingsOpen = false;
-if (isset($_SESSION['open_section'])) {
-    if ($_SESSION['open_section'] === 'pageSettings') {
-        $pageSettingsOpen = true;
-    }
-    unset($_SESSION['open_section']);
+if (isset($_SESSION['open_section']) && $_SESSION['open_section'] === 'pageSettings') {
+    $pageSettingsOpen = true;
 }
-
-// Handle section update
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_section') {
-    $data = [
-        'hero_image' => sanitize($_POST['hero_image'] ?? ''),
-        'show_in_index' => isset($_POST['show_in_index']) ? 1 : 0,
-        'max_items_index' => (int)($_POST['max_items_index'] ?? 6),
-        'index_title' => sanitize($_POST['index_title'] ?? ''),
-        'index_description' => sanitize($_POST['index_description'] ?? ''),
-        'full_title' => sanitize($_POST['full_title'] ?? ''),
-        'full_description' => sanitize($_POST['full_description'] ?? '')
-    ];
-
-    if (updateSectionData('portfolio_section', $data)) {
-        $_SESSION['message'] = 'Seiteneinstellungen wurden erfolgreich aktualisiert!';
-        $_SESSION['message_type'] = 'success';
-        $_SESSION['open_section'] = 'pageSettings';
-        header("Location: projekte.php");
-        exit;
-    } else {
-        $_SESSION['message'] = 'Fehler beim Aktualisieren der Einstellungen.';
-        $_SESSION['message_type'] = 'error';
-    }
+// Unset after checking
+if (isset($_SESSION['open_section'])) {
+    unset($_SESSION['open_section']);
 }
 ?>
 <!DOCTYPE html>
@@ -134,7 +163,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 form.elements['image'].value = data.image;
                 form.elements['active'].checked = data.active == 1;
                 
-                document.getElementById('image_preview').src = data.image ? '../' + data.image : 'assets/img/placeholder.png';
+                const placeholderSvg = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'300\'%3E%3Crect fill=\'%23e5e7eb\' width=\'400\' height=\'300\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%239ca3af\' font-family=\'sans-serif\' font-size=\'18\'%3ENo Image%3C/text%3E%3C/svg%3E';
+                document.getElementById('image_preview').src = data.image ? '../' + data.image : placeholderSvg;
             } else {
                 title.textContent = 'Neues Projekt hinzufügen';
                 btn.textContent = 'Projekt erstellen';
@@ -142,7 +172,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 form.elements['action'].value = 'create';
                 form.elements['id'].value = '';
                 form.elements['date'].value = new Date().toISOString().split('T')[0];
-                document.getElementById('image_preview').src = 'assets/img/placeholder.png';
+                const placeholderSvg = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'300\'%3E%3Crect fill=\'%23e5e7eb\' width=\'400\' height=\'300\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%239ca3af\' font-family=\'sans-serif\' font-size=\'18\'%3ENo Image%3C/text%3E%3C/svg%3E';
+                document.getElementById('image_preview').src = placeholderSvg;
             }
         }
 
@@ -163,6 +194,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 icon.classList.add('fa-chevron-down');
             }
         }
+
+        // Auto-open section if there's a message and section should be open
+        document.addEventListener('DOMContentLoaded', function() {
+            <?php if ($pageSettingsOpen): ?>
+            // Open the section if it should be open
+            const section = document.getElementById('pageSettings');
+            const icon = document.getElementById('icon-pageSettings');
+            if (section && section.classList.contains('hidden')) {
+                section.classList.remove('hidden');
+                if (icon) {
+                    icon.classList.remove('fa-chevron-down');
+                    icon.classList.add('fa-chevron-up');
+                }
+            }
+            <?php endif; ?>
+        });
+
     </script>
 </head>
 <body class="bg-gray-100 font-sans text-gray-900">
@@ -211,58 +259,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     </div>
                     
                     <div id="pageSettings" class="<?php echo $pageSettingsOpen ? '' : 'hidden'; ?> border-t border-gray-100">
-                        <form method="POST" class="p-6">
+                        <form method="POST" action="projekte.php" class="p-6">
                             <input type="hidden" name="action" value="update_section">
                             
                             <div class="space-y-8">
                                 <!-- Index Section -->
                                 <div>
-                                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 border-b pb-2">Bereich auf der Startseite (Index)</h3>
+                                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 border-b pb-2" style="font-family: inherit;">Bereich auf der Startseite (Index)</h3>
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div class="flex items-center mb-4 col-span-2">
-                                            <input type="checkbox" name="show_in_index" id="show_in_index" <?php echo ($sectionData['show_in_index'] ?? 1) ? 'checked' : ''; ?> class="form-checkbox h-5 w-5 text-indigo-600 rounded">
-                                            <label for="show_in_index" class="ml-2 text-gray-700 font-medium">Auf der Startseite anzeigen</label>
+                                            <input type="checkbox" name="show_in_index" id="show_in_index" <?php echo ($sectionData['show_in_index'] ?? 1) ? 'checked' : ''; ?> class="h-5 w-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500">
+                                            <label for="show_in_index" class="ml-2 text-gray-700 font-medium" style="font-family: inherit;">Auf der Startseite anzeigen</label>
                                         </div>
                                         <div>
-                                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Titel auf der Startseite (blog-title)</label>
-                                            <input type="text" name="index_title" value="<?php echo htmlspecialchars($sectionData['index_title'] ?? 'Unser Baujournal'); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1" style="font-family: inherit;">Titel auf der Startseite (blog-title)</label>
+                                            <input type="text" name="index_title" value="<?php echo htmlspecialchars($sectionData['index_title'] ?? 'Unser Baujournal'); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" style="font-family: inherit;">
                                         </div>
                                         <div>
-                                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Anzahl der Projekte auf der Startseite</label>
-                                            <input type="number" name="max_items_index" value="<?php echo htmlspecialchars($sectionData['max_items_index'] ?? 6); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1" style="font-family: inherit;">Anzahl der Projekte auf der Startseite</label>
+                                            <input type="number" name="max_items_index" value="<?php echo htmlspecialchars($sectionData['max_items_index'] ?? 6); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" style="font-family: inherit;">
                                         </div>
                                         <div class="col-span-2">
-                                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Beschreibung auf der Startseite (blog-description)</label>
-                                            <textarea name="index_description" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg"><?php echo htmlspecialchars($sectionData['index_description'] ?? 'Aktuelle Projekte und Inspirationen.'); ?></textarea>
+                                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1" style="font-family: inherit;">Beschreibung auf der Startseite (blog-description)</label>
+                                            <textarea name="index_description" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" style="font-family: inherit;"><?php echo htmlspecialchars($sectionData['index_description'] ?? 'Aktuelle Projekte und Inspirationen.'); ?></textarea>
                                         </div>
                                     </div>
                                 </div>
 
                                 <!-- Portfolio Page Hero -->
                                 <div>
-                                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 border-b pb-2">Vollständige Seite (Portfolio.html)</h3>
+                                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 border-b pb-2" style="font-family: inherit;">Vollständige Seite (Portfolio.html)</h3>
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
-                                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Haupttitel (portfolio-hero-title)</label>
-                                            <input type="text" name="full_title" value="<?php echo htmlspecialchars($sectionData['full_title'] ?? 'Unsere Projekte'); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1" style="font-family: inherit;">Haupttitel (portfolio-hero-title)</label>
+                                            <input type="text" name="full_title" value="<?php echo htmlspecialchars($sectionData['full_title'] ?? 'Unsere Projekte'); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" style="font-family: inherit;">
                                         </div>
                                         <div>
-                                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Hero-Bild</label>
+                                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1" style="font-family: inherit;">Hero-Bild</label>
                                             <div class="flex gap-2">
-                                                <input type="text" id="hero_image" name="hero_image" value="<?php echo htmlspecialchars($sectionData['hero_image'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg" readonly>
-                                                <button type="button" onclick="openMediaPicker('hero_image')" class="bg-gray-100 px-3 py-2 rounded border border-gray-300 hover:bg-gray-200"><i class="fas fa-image"></i></button>
+                                                <input type="text" id="hero_image" name="hero_image" value="<?php echo htmlspecialchars($sectionData['hero_image'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" readonly style="font-family: inherit;">
+                                                <button type="button" onclick="openMediaPicker('hero_image')" class="bg-gray-100 px-3 py-2 rounded border border-gray-300 hover:bg-gray-200 transition-colors"><i class="fas fa-image"></i></button>
                                             </div>
                                         </div>
                                         <div class="col-span-2">
-                                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Beschreibung (portfolio-hero-description)</label>
-                                            <textarea name="full_description" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg"><?php echo htmlspecialchars($sectionData['full_description'] ?? 'Eine Auswahl unserer erfolgreich abgeschlossenen Projekte'); ?></textarea>
+                                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1" style="font-family: inherit;">Beschreibung (portfolio-hero-description)</label>
+                                            <textarea name="full_description" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" style="font-family: inherit;"><?php echo htmlspecialchars($sectionData['full_description'] ?? 'Eine Auswahl unserer erfolgreich abgeschlossenen Projekte'); ?></textarea>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="mt-8 flex justify-end">
-                                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transform hover:-translate-y-0.5 transition-all">
+                            <div class="mt-8 flex justify-end border-t border-gray-200 pt-6">
+                                <button type="submit" id="saveSettingsBtn" class="bg-primary hover:bg-primary-dark text-white font-bold py-2.5 px-6 rounded-lg shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center">
                                     <i class="fas fa-save mr-2"></i> Einstellungen speichern
                                 </button>
                             </div>
@@ -284,8 +332,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         <?php foreach ($projects as $proj): ?>
                             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow group relative flex flex-col">
                                 <div class="relative h-48 bg-gray-100">
-                                    <img src="../<?php echo !empty($proj['image']) ? htmlspecialchars($proj['image']) : 'assets/img/placeholder.png'; ?>" 
-                                         class="w-full h-full object-cover">
+                                    <?php 
+                                    $imgPath = !empty($proj['image']) ? '../' . htmlspecialchars($proj['image']) : 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'300\'%3E%3Crect fill=\'%23e5e7eb\' width=\'400\' height=\'300\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%239ca3af\' font-family=\'sans-serif\' font-size=\'18\'%3ENo Image%3C/text%3E%3C/svg%3E';
+                                    ?>
+                                    <img src="<?php echo $imgPath; ?>" 
+                                         class="w-full h-full object-cover" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'300\'%3E%3Crect fill=\'%23e5e7eb\' width=\'400\' height=\'300\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%239ca3af\' font-family=\'sans-serif\' font-size=\'18\'%3ENo Image%3C/text%3E%3C/svg%3E'">
                                     
                                     <div class="absolute top-2 right-2">
                                         <span class="bg-white/90 text-gray-800 text-xs font-bold px-2 py-1 rounded shadow-sm uppercase tracking-wide">
@@ -372,7 +423,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     <div class="col-span-2">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Projektbild</label>
                         <div class="relative group cursor-pointer border-2 border-dashed border-gray-300 rounded-lg hover:border-primary transition-colors bg-gray-50 p-1" onclick="openMediaPicker('modal_image')">
-                            <img src="assets/img/placeholder.png" id="image_preview" class="w-full h-48 object-cover rounded">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23e5e7eb' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%239ca3af' font-family='sans-serif' font-size='18'%3ENo Image%3C/text%3E%3C/svg%3E" id="image_preview" class="w-full h-48 object-cover rounded">
                             <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/10">
                                 <span class="bg-white text-gray-800 text-xs font-bold px-2 py-1 rounded shadow">Auswählen</span>
                             </div>

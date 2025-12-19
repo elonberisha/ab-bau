@@ -17,7 +17,7 @@ $impressumContent = $legal['impressum_content'] ?? '<p class="text-center py-10"
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="description" content="Impressum - AB Bau">
-    <title>Impressum - AB Bau | Bau und Fliesen UG</title>
+    <title>Impressum - AB Bau | Bau und Fliesen GmbH</title>
     
     <!-- Tailwind CSS -->
     <link rel="stylesheet" href="dist/css/output.css">
@@ -137,7 +137,7 @@ $impressumContent = $legal['impressum_content'] ?? '<p class="text-center py-10"
                 </div>
             </div>
             <div class="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
-                <p>&copy; 2025 AB Bau - Bau und Fliesen UG (haftungsbeschränkt). Alle Rechte vorbehalten. | 
+                <p>&copy; 2025 AB Bau - Bau und Fliesen GmbH. Alle Rechte vorbehalten. | 
                 <a href="impressum.php" class="hover:text-white transition-colors">Impressum</a> | 
                 <a href="datenschutz.php" class="hover:text-white transition-colors">Datenschutz</a> | 
                 <a href="agb.php" class="hover:text-white transition-colors">AGB</a></p>

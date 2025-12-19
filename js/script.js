@@ -632,7 +632,7 @@ if (document.readyState === 'loading') {
     initCookieBanner();
 }
 
-console.log('%cAB Bau - Bau und Fliesen UG', 'color: #0066cc; font-size: 20px; font-weight: bold;');
+console.log('%cAB Bau - Bau und Fliesen GmbH', 'color: #0066cc; font-size: 20px; font-weight: bold;');
 console.log('%cProfessionelle Bau- und Fliesenarbeiten', 'color: #666; font-size: 14px;');
 console.log('%cKontakt: office@ab-bau.de | Tel: 08137 9957477', 'color: #999; font-size: 12px;');
 

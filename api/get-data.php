@@ -84,6 +84,7 @@ try {
                     'title' => $hero['title'],
                     'subtitle' => $hero['subtitle'],
                     'image' => $hero['image'],
+                    'mini_text' => $hero['mini_text'] ?? 'PREMIUM QUALITÄT SEIT 2010',
                     'button1_text' => $hero['button1_text'],
                     'button1_link' => $hero['button1_link'],
                     'button2_text' => $hero['button2_text'],
