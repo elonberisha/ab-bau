@@ -195,6 +195,7 @@ try {
                     'opening_hours_sunday' => $contact['opening_hours_sunday'] ?? '',
                     'form_title' => $contact['form_title'] ?? '',
                     'form_button' => $contact['form_button'] ?? '',
+                    'service_options' => !empty($contact['service_options']) ? json_decode($contact['service_options'], true) : [],
                     'map_embed_code' => $contact['map_embed_code'] ?? ''
                 ];
             }

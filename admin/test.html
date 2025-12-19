@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AB Bau Fliesen - Specifikime për Imazhet</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 15mm;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', 'Helvetica', sans-serif;
+            padding: 20px;
+            background: white;
+            color: #1a1a1a;
+            font-size: 11px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #2563eb;
+        }
+        h1 {
+            color: #1a1a1a;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 12px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            page-break-inside: avoid;
+        }
+        thead {
+            background: #2563eb;
+            color: white;
+        }
+        th {
+            padding: 10px 8px;
+            text-align: left;
+            font-weight: bold;
+            font-size: 10px;
+            text-transform: uppercase;
+            border: 1px solid #1d4ed8;
+        }
+        td {
+            padding: 8px;
+            border: 1px solid #e5e7eb;
+            font-size: 10px;
+            vertical-align: top;
+        }
+        tbody tr:nth-child(even) {
+            background: #f9fafb;
+        }
+        .format-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 9px;
+            font-weight: bold;
+            margin: 1px;
+        }
+        .format-jpeg { background: #dbeafe; color: #1e40af; }
+        .format-png { background: #fce7f3; color: #9f1239; }
+        .format-webp { background: #dcfce7; color: #166534; }
+        .size-badge {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 9px;
+            font-weight: bold;
+        }
+        .usage {
+            color: #4b5563;
+            font-size: 9px;
+            font-style: italic;
+        }
+        .notes {
+            background: #f0f9ff;
+            border-left: 4px solid #2563eb;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+            page-break-inside: avoid;
+        }
+        .notes h3 {
+            color: #1e40af;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+        .notes ul {
+            margin-left: 18px;
+            line-height: 1.6;
+        }
+        .notes li {
+            margin-bottom: 5px;
+            font-size: 10px;
+        }
+        .footer {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px solid #e5e7eb;
+            color: #6b7280;
+            font-size: 9px;
+            text-align: center;
+        }
+        @media print {
+            body {
+                padding: 0;
+            }
+            .header {
+                page-break-after: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📸 AB Bau Fliesen - Specifikime për Imazhet</h1>
+        <p class="subtitle">Udhëzues i plotë për madhësi, formate dhe optimizim të imazheve</p>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 15%;">Lloji i Imazhit</th>
+                <th style="width: 15%;">Madhësia (Gjerësia × Lartësia)</th>
+                <th style="width: 10%;">Aspect Ratio</th>
+                <th style="width: 15%;">Format</th>
+                <th style="width: 12%;">Pesha Maksimale</th>
+                <th style="width: 33%;">Përdorimi</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Hero Image</strong></td>
+                <td>1920 × 1080 px</td>
+                <td>16:9</td>
+                <td>
+                    <span class="format-badge format-jpeg">JPEG</span>
+                    <span class="format-badge format-webp">WebP</span>
+                </td>
+                <td><span class="size-badge">500 KB</span></td>
+                <td class="usage">Background image në hero section (full width)</td>
+            </tr>
+            <tr>
+                <td><strong>Gallery Images</strong></td>
+                <td>1200 × 800 px</td>
+                <td>3:2</td>
+                <td>
+                    <span class="format-badge format-jpeg">JPEG</span>
+                    <span class="format-badge format-webp">WebP</span>
+                </td>
+                <td><span class="size-badge">300 KB</span></td>
+                <td class="usage">Galeria në home, portfolio dhe detail pages</td>
+            </tr>
+            <tr>
+                <td><strong>Project Images</strong></td>
+                <td>1200 × 900 px</td>
+                <td>4:3</td>
+                <td>
+                    <span class="format-badge format-jpeg">JPEG</span>
+                    <span class="format-badge format-webp">WebP</span>
+                </td>
+                <td><span class="size-badge">400 KB</span></td>
+                <td class="usage">Imazhet kryesore të projekteve</td>
+            </tr>
+            <tr>
+                <td><strong>Partner Logos</strong></td>
+                <td>300 × 200 px<br><small style="font-size: 8px;">ose 200 × 200 px</small></td>
+                <td>3:2 ose 1:1</td>
+                <td>
+                    <span class="format-badge format-png">PNG</span>
+                    <span class="format-badge format-jpeg">JPEG</span>
+                </td>
+                <td><span class="size-badge">100 KB</span></td>
+                <td class="usage">Logo të partnerëve në index.html</td>
+            </tr>
+            <tr>
+                <td><strong>Service Images</strong></td>
+                <td>800 × 600 px</td>
+                <td>4:3</td>
+                <td>
+                    <span class="format-badge format-jpeg">JPEG</span>
+                    <span class="format-badge format-webp">WebP</span>
+                </td>
+                <td><span class="size-badge">250 KB</span></td>
+                <td class="usage">Imazhet e shërbimeve në services section</td>
+            </tr>
+            <tr>
+                <td><strong>About Images</strong></td>
+                <td>600 × 400 px</td>
+                <td>3:2</td>
+                <td>
+                    <span class="format-badge format-jpeg">JPEG</span>
+                    <span class="format-badge format-webp">WebP</span>
+                </td>
+                <td><span class="size-badge">200 KB</span></td>
+                <td class="usage">3 imazhe në about section (cards)</td>
+            </tr>
+            <tr>
+                <td><strong>Catalog Images</strong></td>
+                <td>1000 × 1000 px<br><small style="font-size: 8px;">ose 1200 × 900 px</small></td>
+                <td>1:1 ose 4:3</td>
+                <td>
+                    <span class="format-badge format-jpeg">JPEG</span>
+                    <span class="format-badge format-webp">WebP</span>
+                </td>
+                <td><span class="size-badge">300 KB</span></td>
+                <td class="usage">Imazhet e produkteve në katalogë</td>
+            </tr>
+            <tr>
+                <td><strong>Portfolio Hero</strong></td>
+                <td>1920 × 600 px</td>
+                <td>16:5</td>
+                <td>
+                    <span class="format-badge format-jpeg">JPEG</span>
+                    <span class="format-badge format-webp">WebP</span>
+                </td>
+                <td><span class="size-badge">400 KB</span></td>
+                <td class="usage">Hero image në portfolio.html (wide banner)</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="notes">
+        <h3>📋 Rekomandime të përgjithshme:</h3>
+        <ul>
+            <li><strong>Optimizim:</strong> Përdor WebP për imazhe më të vogla, kompreso para ngarkimit (TinyPNG, Squoosh)</li>
+            <li><strong>Kualiteti:</strong> Rezolucion 72-96 DPI për web, RGB color space (jo CMYK), kontrast dhe qartësi të mira</li>
+            <li><strong>Emërtimi:</strong> Emra deskriptivë (p.sh. hero-background-2024.jpg), shmang karaktere speciale dhe hapësira</li>
+            <li><strong>Aspect Ratio:</strong> Ruaj raportet e rekomanduara për konsistencë, crop para ngarkimit nëse është e nevojshme</li>
+            <li><strong>Pesha e skedarit:</strong> Respekto limitet e peshës për performancë optimale dhe ngarkim të shpejtë</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        <p><strong>AB Bau - Bau und Fliesen GmbH</strong></p>
+        <p>Dokument i krijuar: <script>document.write(new Date().toLocaleDateString('de-DE'));</script></p>
+    </div>
+</body>
+</html>

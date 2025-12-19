@@ -625,6 +625,33 @@ function renderCustomization(data) {
         if (formBtn && data.contact.form_button) {
             formBtn.textContent = data.contact.form_button;
         }
+        
+        // Service options dropdown
+        const serviceSelect = document.getElementById('service');
+        if (serviceSelect && Array.isArray(data.contact.service_options) && data.contact.service_options.length > 0) {
+            // Clear existing options except the first one (placeholder)
+            const placeholder = serviceSelect.querySelector('option[value=""]');
+            serviceSelect.innerHTML = '';
+            if (placeholder) {
+                serviceSelect.appendChild(placeholder);
+            } else {
+                // Add default placeholder if it doesn't exist
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Bitte wählen Sie eine Leistung';
+                serviceSelect.appendChild(defaultOption);
+            }
+            
+            // Add dynamic options
+            data.contact.service_options.forEach(option => {
+                if (option.value && option.label) {
+                    const optionEl = document.createElement('option');
+                    optionEl.value = option.value;
+                    optionEl.textContent = option.label;
+                    serviceSelect.appendChild(optionEl);
+                }
+            });
+        }
 
         // Projektleitung
         if (data.contact) {

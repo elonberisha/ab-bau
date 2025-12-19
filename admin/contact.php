@@ -14,6 +14,20 @@ if (isset($_SESSION['message'])) {
 
 // Handle Form Submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Process service options
+    $serviceOptions = [];
+    if (isset($_POST['service_options']) && is_array($_POST['service_options'])) {
+        foreach ($_POST['service_options'] as $option) {
+            if (!empty($option['value']) && !empty($option['label'])) {
+                $serviceOptions[] = [
+                    'value' => sanitize($option['value']),
+                    'label' => sanitize($option['label'])
+                ];
+            }
+        }
+    }
+    $serviceOptionsJson = !empty($serviceOptions) ? json_encode($serviceOptions, JSON_UNESCAPED_UNICODE) : null;
+    
     $data = [
         'title' => sanitize($_POST['title']),
         'subtitle' => sanitize($_POST['subtitle']),
@@ -38,6 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Form Settings
         'form_title' => sanitize($_POST['form_title']),
         'form_button' => sanitize($_POST['form_button']),
+        'service_options' => $serviceOptionsJson,
 
         // Social Media
         'facebook_link' => sanitize($_POST['facebook_link']),
@@ -224,6 +239,62 @@ $contact = getSectionData('contact_section');
                         </div>
                     </div>
 
+                    <!-- Service Options (Gewünschte Leistung) -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <h2 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b flex items-center">
+                            <i class="fas fa-list-ul mr-2 text-blue-500"></i>Gewünschte Leistung - Dropdown Optionen
+                        </h2>
+                        <p class="text-sm text-gray-600 mb-4">Verwalten Sie die Optionen für das Dropdown-Feld "Gewünschte Leistung" im Kontaktformular.</p>
+                        
+                        <div id="service-options-container" class="space-y-3 mb-4">
+                            <?php
+                            $serviceOptions = [];
+                            if (!empty($contact['service_options'])) {
+                                $serviceOptions = json_decode($contact['service_options'], true);
+                            }
+                            if (empty($serviceOptions)) {
+                                // Default options
+                                $serviceOptions = [
+                                    ['value' => 'keramik', 'label' => 'Keramik'],
+                                    ['value' => 'marmor', 'label' => 'Marmor'],
+                                    ['value' => 'granit', 'label' => 'Granit'],
+                                    ['value' => 'beratung', 'label' => 'Beratung']
+                                ];
+                            }
+                            foreach ($serviceOptions as $index => $option): ?>
+                                <div class="service-option-item flex gap-3 items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                    <div class="flex-1 grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Wert (Value)</label>
+                                            <input type="text" name="service_options[<?php echo $index; ?>][value]" 
+                                                   value="<?php echo htmlspecialchars($option['value'] ?? ''); ?>" 
+                                                   placeholder="z.B. keramik" 
+                                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Label (Anzeige)</label>
+                                            <input type="text" name="service_options[<?php echo $index; ?>][label]" 
+                                                   value="<?php echo htmlspecialchars($option['label'] ?? ''); ?>" 
+                                                   placeholder="z.B. Keramik" 
+                                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required>
+                                        </div>
+                                    </div>
+                                    <button type="button" onclick="removeServiceOption(this)" 
+                                            class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg text-sm transition-colors">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        
+                        <button type="button" onclick="addServiceOption()" 
+                                class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                            <i class="fas fa-plus"></i> Option hinzufügen
+                        </button>
+                        
+                        <input type="hidden" name="service_options_json" id="service_options_json" value="">
+                    </div>
+
                     <!-- Social Media -->
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                         <h2 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b flex items-center">
@@ -268,5 +339,46 @@ $contact = getSectionData('contact_section');
             </main>
         </div>
     </div>
+
+    <script>
+        let serviceOptionIndex = <?php echo count($serviceOptions); ?>;
+        
+        function addServiceOption() {
+            const container = document.getElementById('service-options-container');
+            const newOption = document.createElement('div');
+            newOption.className = 'service-option-item flex gap-3 items-center p-3 bg-gray-50 rounded-lg border border-gray-200';
+            newOption.innerHTML = `
+                <div class="flex-1 grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Wert (Value)</label>
+                        <input type="text" name="service_options[${serviceOptionIndex}][value]" 
+                               placeholder="z.B. keramik" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Label (Anzeige)</label>
+                        <input type="text" name="service_options[${serviceOptionIndex}][label]" 
+                               placeholder="z.B. Keramik" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required>
+                    </div>
+                </div>
+                <button type="button" onclick="removeServiceOption(this)" 
+                        class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg text-sm transition-colors">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+            container.appendChild(newOption);
+            serviceOptionIndex++;
+        }
+        
+        function removeServiceOption(button) {
+            const container = document.getElementById('service-options-container');
+            if (container.children.length > 1) {
+                button.closest('.service-option-item').remove();
+            } else {
+                alert('Mindestens eine Option muss vorhanden sein!');
+            }
+        }
+    </script>
 </body>
 </html>

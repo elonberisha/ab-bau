@@ -32,12 +32,13 @@ define('CONTACT_EMAIL', 'anduena@ab-bau-fliesen.de');
  * 
  * @param string $to Recipient email
  * @param string $subject Email subject
- * @param string $message Email body
+ * @param string $message Email body (can be HTML or plain text)
  * @param string $fromEmail Sender email (optional)
  * @param string $fromName Sender name (optional)
+ * @param bool $isHTML Whether the message is HTML (default: false)
  * @return bool True on success, false on failure
  */
-function sendEmailSMTP($to, $subject, $message, $fromEmail = null, $fromName = null) {
+function sendEmailSMTP($to, $subject, $message, $fromEmail = null, $fromName = null, $isHTML = false) {
     if (!SMTP_ENABLED) {
         // Fallback to PHP mail() if SMTP is disabled
         $headers = "From: " . ($fromEmail ?: SMTP_FROM_EMAIL) . "\r\n";
@@ -175,9 +176,33 @@ function sendEmailSMTP($to, $subject, $message, $fromEmail = null, $fromName = n
     $emailData = "From: " . $fromName . " <" . $fromEmail . ">\r\n";
     $emailData .= "To: <" . $to . ">\r\n";
     $emailData .= "Subject: " . $subject . "\r\n";
-    $emailData .= "Content-Type: text/plain; charset=UTF-8\r\n";
-    $emailData .= "\r\n";
-    $emailData .= $message . "\r\n";
+    
+    if ($isHTML) {
+        // For HTML emails, use multipart/alternative with both HTML and plain text
+        $boundary = "----=_NextPart_" . md5(time());
+        $emailData .= "MIME-Version: 1.0\r\n";
+        $emailData .= "Content-Type: multipart/alternative; boundary=\"$boundary\"\r\n";
+        $emailData .= "\r\n";
+        $emailData .= "--$boundary\r\n";
+        $emailData .= "Content-Type: text/plain; charset=UTF-8\r\n";
+        $emailData .= "Content-Transfer-Encoding: 7bit\r\n";
+        $emailData .= "\r\n";
+        // Plain text version (strip HTML tags)
+        $plainText = strip_tags($message);
+        $plainText = html_entity_decode($plainText, ENT_QUOTES, 'UTF-8');
+        $emailData .= $plainText . "\r\n";
+        $emailData .= "\r\n--$boundary\r\n";
+        $emailData .= "Content-Type: text/html; charset=UTF-8\r\n";
+        $emailData .= "Content-Transfer-Encoding: 7bit\r\n";
+        $emailData .= "\r\n";
+        $emailData .= $message . "\r\n";
+        $emailData .= "\r\n--$boundary--\r\n";
+    } else {
+        $emailData .= "Content-Type: text/plain; charset=UTF-8\r\n";
+        $emailData .= "\r\n";
+        $emailData .= $message . "\r\n";
+    }
+    
     $emailData .= ".\r\n";
     
     fputs($smtp, $emailData);
@@ -199,9 +224,18 @@ function sendEmailSMTP($to, $subject, $message, $fromEmail = null, $fromName = n
 /**
  * Simple email sending function (wrapper)
  * Falls back to file writing if SMTP fails (for local development)
+ * 
+ * @param string $to Recipient email
+ * @param string $subject Email subject
+ * @param string $message Email body (can be HTML or plain text)
+ * @param string $fromEmail Sender email (optional)
+ * @param string $fromName Sender name (optional)
+ * @param bool $writeToFile Write to file if SMTP fails (default: false)
+ * @param bool $isHTML Whether the message is HTML (default: false)
+ * @return bool True on success, false on failure
  */
-function sendEmail($to, $subject, $message, $fromEmail = null, $fromName = null, $writeToFile = false) {
-    $result = sendEmailSMTP($to, $subject, $message, $fromEmail, $fromName);
+function sendEmail($to, $subject, $message, $fromEmail = null, $fromName = null, $writeToFile = false, $isHTML = false) {
+    $result = sendEmailSMTP($to, $subject, $message, $fromEmail, $fromName, $isHTML);
     
     // If SMTP succeeds, return true
     if ($result) {
