@@ -628,29 +628,55 @@ function renderCustomization(data) {
         
         // Service options dropdown
         const serviceSelect = document.getElementById('service');
-        if (serviceSelect && Array.isArray(data.contact.service_options) && data.contact.service_options.length > 0) {
-            // Clear existing options except the first one (placeholder)
-            const placeholder = serviceSelect.querySelector('option[value=""]');
-            serviceSelect.innerHTML = '';
-            if (placeholder) {
-                serviceSelect.appendChild(placeholder);
-            } else {
-                // Add default placeholder if it doesn't exist
+        if (serviceSelect) {
+            // Debug logging
+            console.log('Service select element found:', serviceSelect);
+            console.log('Service options data:', data.contact.service_options);
+            
+            // Check if service_options exists and is valid
+            let serviceOptions = [];
+            if (data.contact.service_options) {
+                // If it's a string, try to parse it
+                if (typeof data.contact.service_options === 'string') {
+                    try {
+                        serviceOptions = JSON.parse(data.contact.service_options);
+                    } catch (e) {
+                        console.error('Error parsing service_options JSON:', e);
+                        serviceOptions = [];
+                    }
+                } else if (Array.isArray(data.contact.service_options)) {
+                    serviceOptions = data.contact.service_options;
+                }
+            }
+            
+            console.log('Parsed service options:', serviceOptions);
+            
+            if (Array.isArray(serviceOptions) && serviceOptions.length > 0) {
+                // Clear existing options
+                serviceSelect.innerHTML = '';
+                
+                // Add placeholder option
                 const defaultOption = document.createElement('option');
                 defaultOption.value = '';
                 defaultOption.textContent = 'Bitte wählen Sie eine Leistung';
                 serviceSelect.appendChild(defaultOption);
+                
+                // Add dynamic options
+                serviceOptions.forEach(option => {
+                    if (option && option.value && option.label) {
+                        const optionEl = document.createElement('option');
+                        optionEl.value = option.value;
+                        optionEl.textContent = option.label;
+                        serviceSelect.appendChild(optionEl);
+                    }
+                });
+                
+                console.log('Service options rendered successfully');
+            } else {
+                console.warn('No valid service options found or empty array');
             }
-            
-            // Add dynamic options
-            data.contact.service_options.forEach(option => {
-                if (option.value && option.label) {
-                    const optionEl = document.createElement('option');
-                    optionEl.value = option.value;
-                    optionEl.textContent = option.label;
-                    serviceSelect.appendChild(optionEl);
-                }
-            });
+        } else {
+            console.warn('Service select element not found');
         }
 
         // Projektleitung
